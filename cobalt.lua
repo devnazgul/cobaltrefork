@@ -1,28 +1,12 @@
---[[
-    Cobalt
-    A runtime developer tool to monitor and intercept network traffic
-    coming from the roblox game engine.
-    
-    This script is NOT intended to be modified.
-    To view the source code, see the 'Src' folder on the official GitHub repository!
-
-    Authors: deivid, upio
-    GitHub: https://github.com/notpoiu/cobalt/                                      
---]]
-
-
--- ++++++++ WAX BUNDLED DATA BELOW ++++++++ --
-
--- Will be used later for getting flattened globals
 local ImportGlobals
 
--- Holds direct closure data (defining this before the DOM tree for line debugging etc)
+
 local ClosureBindings = {
     function()local wax,script,require=ImportGlobals(1)local ImportGlobals return (function(...)wax.shared.CobaltStartTime = tick()
 
 local FileLogger = require(script.Utils.FileLog)
 
--- Environment
+
 for _, Service in pairs({
 	"ContentProvider",
 	"CoreGui",
@@ -43,24 +27,24 @@ wax.shared.Settings = {}
 
 wax.shared.Hooks = {}
 
--- Executor Support
+
 wax.shared.ExecutorName = identifyexecutor()
 wax.shared.ExecutorSupport = require(script.ExecutorSupport)
 
--- Utils
+
 require(script.Utils.Connect)
 wax.shared.Hooking = require(script.Utils.Hooking)
 
--- UI
+
 wax.shared.Sonner = require(script.Utils.UI.Sonner)
 
--- Code Generation
+
 local LuaEncode = require(script.Utils.Serializer.LuaEncode)
 wax.shared.LuaEncode = LuaEncode
 
 local CodeGen = require(script.Utils.CodeGen.Generator)
 
--- Variables
+
 if not wax.shared.Players.LocalPlayer then
 	wax.shared.Players.PlayerAdded:Wait()
 end
@@ -80,7 +64,7 @@ else
 	end))
 end
 
--- Functions
+
 wax.shared.gethui = gethui or function()
 	return wax.shared.CoreGui
 end
@@ -128,7 +112,7 @@ wax.shared.newcclosure = wax.shared.ExecutorName == "AWP"
 				return __F(...)
 			end
 
-			setfenv(nf, x) -- set func env (env of nf gets deoptimized)
+			setfenv(nf, x) 
 			return newcclosure(nf, name)
 		end
 	or newcclosure
@@ -259,7 +243,7 @@ end
 
 local AnticheatData = require(script.Utils.Anticheats.Main)
 
--- Load Script
+
 wax.shared.Communicator = Instance.new("BindableEvent")
 
 wax.shared.SetupLoggingConnection = function()
@@ -379,7 +363,7 @@ wax.shared.Connect(wax.shared.LocalPlayer.OnTeleport:Connect(function()
 		return
 	end
 
-	-- getgenv().COBALT_LATEST_URL for dev environments
+	
 	local CobaltURL = getgenv().COBALT_LATEST_URL
 		or "https://github.com/notpoiu/cobalt/releases/latest/download/Cobalt.luau"
 	wax.shared.queue_on_teleport(string.format(
@@ -403,12 +387,12 @@ if AnticheatData.Disabled then
 end
 
 end)() end,
-    function()local wax,script,require=ImportGlobals(2)local ImportGlobals return (function(...)--[[
+    function()local wax,script,require=ImportGlobals(2)local ImportGlobals return (function(...)
 
-	Very lightweight checks for various executor functions and reports whether they are working or not.
-	Some checks also verify that the function works as intended, not just that it exists.
 
-]]
+
+
+
 
 local ExecutorSupport = {
 	FailedChecks = {
@@ -419,7 +403,7 @@ local ExecutorSupport = {
 
 local BrokenFeatures = {
 	["Volcano"] = { "oth", "run_on_actor" },
-	["Potassium"] = { "oth" } -- submit a pr to luau
+	["Potassium"] = { "oth" } 
 }
 
 local function CheckFFlagValue(Name: string, Value: any)
@@ -472,16 +456,16 @@ local function test(name, Callback, CheckType, Essential)
 	end
 end
 
--- FFlag Library
+
 test("getfflag", getfflag, true)
 test("setfflag", setfflag, true)
 
--- Actor Library
+
 test("getactors", getactors, true)
 test("run_on_actor", run_on_actor, true)
 test("create_comm_channel", create_comm_channel, true)
 
--- Closure Library
+
 test("newcclosure", function()
 	assert(typeof(newcclosure) == "function", "newcclosure is not a function")
 	local CClosure = newcclosure(function()
@@ -595,7 +579,7 @@ test("setstackhidden", function()
 	assert(IsHidden == true, "setstackhidden did not hide the function from the stack (error with level traceback)")
 end, false, false)
 
--- Oth Library
+
 test("oth", function()
 	assert(oth ~= nil, "oth library not found")
 
@@ -695,7 +679,7 @@ test("oth", function()
 	))
 end, false, false)
 
--- Metamethod
+
 test("hookmetamethod", function()
 	assert(typeof(hookmetamethod) == "function", "hookmetamethod is not a function")
 
@@ -749,7 +733,7 @@ test("getrawmetatable", function()
 	)
 end)
 
--- Instance Library
+
 test("getcallbackvalue", function()
 	assert(typeof(getcallbackvalue) == "function", "getcallbackvalue is not a function")
 
@@ -835,7 +819,7 @@ test("cloneref", function()
 	assert(typeof(cloneref) == "function", "cloneref is not a function")
 
 	local ref = cloneref(game)
-	assert(ref ~= game, "cloneref did not create a ref to instance")
+	assert(not rawequal(ref, game), "cloneref did not create a ref to instance")
 	assert(typeof(ref) == "Instance", "cloneref did not return an instance")
 end)
 test("compareinstances", function()
@@ -907,9 +891,9 @@ end
 return ExecutorSupport
 
 end)() end,
-    [17] = function()local wax,script,require=ImportGlobals(17)local ImportGlobals return (function(...)--[[
-    Bypasses for popular roblox anticheats
-]]
+    [17] = function()local wax,script,require=ImportGlobals(17)local ImportGlobals return (function(...)
+
+
 
 local AnticheatData = {
 	Disabled = false,
@@ -976,12 +960,12 @@ end
 return AnticheatData
 
 end)() end,
-    [34] = function()local wax,script,require=ImportGlobals(34)local ImportGlobals return (function(...)-- LuaEncode - Fast table serialization library for pure Luau/Lua 5.1+
--- MIT License | Copyright (c) 2022-2025 Chad Hyatt <chad@hyatt.page>
--- https://github.com/chadhyatt/LuaEncode
+    [34] = function()local wax,script,require=ImportGlobals(34)local ImportGlobals return (function(...)
 
---!optimize 2
---!native
+
+
+
+
 
 local table, string, next, pcall, game, workspace, tostring, tonumber, getmetatable =
     table, string, next, pcall, game, workspace, tostring, tonumber, getmetatable
@@ -1018,8 +1002,8 @@ local function LookupTable(array, lookupType)
     return Out
 end
 
--- Used for checking direct getfield syntax; Lua keywords can't be used as keys without being a str
--- FYI; `continue` is Luau only (in Lua it's actually a global function)
+
+
 local LuaKeywords = LookupTable({
     "and", "break", "do", "else",
     "elseif", "end", "false", "for",
@@ -1029,7 +1013,7 @@ local LuaKeywords = LookupTable({
     "while", "continue"
 })
 
--- Used to properly serialize NaN values
+
 local NumberCorrection = {
 	[string_pack(">n", 0 / 0)] = "0/0",
 	[string_pack(">n", -(0 / 0))] = "-(0/0)",
@@ -1037,7 +1021,7 @@ local NumberCorrection = {
 	[string_pack(">n", tonumber("-nan"))] = 'tonumber("-nan")',
 }
 
--- Type names that can be used as manual key indexes (i.e. non-reference types)
+
 local KeyIndexTypes = LookupTable({
     "number", "string", "boolean", "Enum",
     "EnumItem", "Enums"
@@ -1054,7 +1038,7 @@ local function CheckType(inputData, dataName, ...)
         error(string_format(
             "LuaEncode: Incorrect type for `%s`: `%s` expected, got `%s`",
             dataName,
-            table_concat(ValidTypes, ", "), -- For if multiple types are accepted
+            table_concat(ValidTypes, ", "), 
             InputType
         ), 0)
     end
@@ -1062,11 +1046,11 @@ local function CheckType(inputData, dataName, ...)
     return inputData
 end
 
--- This re-serializes a string back into Lua, for the interpreter AND humans to read. This fixes
--- `string_format("%q")` only outputting in system encoding, instead of explicit Lua byte escapes
+
+
 local SerializeString
 do
-    -- These are control characters to be encoded in a certain way in Lua rather than just a byte escape
+    
     local SpecialCharacters = {
         ["\""] = "\\\"",
         ["\\"] = "\\\\",
@@ -1088,13 +1072,13 @@ do
     end
 
     function SerializeString(inputString)
-        -- FYI; We can't do "\0-\31" in Lua 5.1 (Only Luau/Lua 5.2+) due to an embedded zeros in pattern
-        -- issue. See: https://stackoverflow.com/a/22962409
+        
+        
         return table_concat({ '"', string_gsub(inputString, "[%z\\\"\1-\31\127-\255]", SpecialCharacters), '"' })
     end
 end
 
--- Escape warning messages and such for comment block inserts
+
 local function CommentBlock(inputString)
     local Longest = -1
     for Match in string_gmatch(inputString, "%](=*)%]") do
@@ -1107,37 +1091,37 @@ local function CommentBlock(inputString)
     return "--[" .. Padding .. "[" .. inputString .. "]" .. Padding .. "]"
 end
 
---[[
-LuaEncode(inputTable: {[any]: any}, options: {[string]: any}): string
 
-    ---------- OPTIONS: ----------
 
-    Prettify <boolean:false> | Whether or not the output should be pretty printed
 
-    IndentCount <number:0> | The amount of characters that should be used for indents
-    (**Note**: If `Prettify` is set to true and this is unspecified, it will default to `4`)
 
-    InsertCycles <boolean:false> | If there are cyclic references in your table, the output
-    will be wrapped in an anonymous function that manually sets paths to those references.
-    (**NOTE:** If a key in the index path to the cycle is a reference type (e.g. `table`,
-    `function`), the codegen can't externally set that path, and the value will have to be ignored)
 
-    OutputWarnings <boolean:true> | If "warnings" should be placed into the output as
-    comment blocks
 
-    UseInstancePaths <boolean:true> | If Roblox `Instance` values should return their
-    Lua-accessable path for serialization. If the instance is parented under `nil` or
-    isn't under `game`/`workspace`, it'll always fall back to `Instance.new(ClassName)`
 
-    UseFindFirstChild  <boolean:true> | When `options.UseInstancePaths` is true, whether or
-    not instance paths should use `FindFirstChild` instead of direct indexes
 
-    SerializeMathHuge <boolean:true> | If "infinite" (or negative-infinite) numbers should
-    be serialized as `math.huge`. (uses the `math` global, as opposed to just a direct data
-    type) If false, "`1/0`" or "`-1/0`" will be serialized, which is supported on all
-    target Lua environments
 
-]]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 local function LuaEncode(inputTable, options)
     options = options or {}
@@ -1146,7 +1130,7 @@ local function LuaEncode(inputTable, options)
     CheckType(options, "options", "table")
 
     CheckType(options.Prettify, "options.Prettify", "boolean", "nil")
-    CheckType(options.PrettyPrinting, "options.PrettyPrinting", "boolean", "nil") -- Alias for `Options.Prettify`
+    CheckType(options.PrettyPrinting, "options.PrettyPrinting", "boolean", "nil") 
     CheckType(options.IndentCount, "options.IndentCount", "number", "nil")
     CheckType(options.InsertCycles, "options.InsertCycles", "boolean", "nil")
     CheckType(options.OutputWarnings, "options.OutputWarnings", "boolean", "nil")
@@ -1172,11 +1156,11 @@ local function LuaEncode(inputTable, options)
     local IsArray = (options.IsArray == nil and false) or options.IsArray
 
     local StackLevelOpt = options._StackLevel or 1
-    local VisitedTables = options._VisitedTables or {} -- [Ref: table] = true
+    local VisitedTables = options._VisitedTables or {} 
     local SharedTableLarpAsRegTable = options._SharedTableLarpAsRegTable or false
     local DidInsertNilFunction = options._DidInsertNilFunction or false
 
-    -- Lazy serialization reference values
+    
     local PositiveInf = (SerializeMathHuge and "math.huge") or "1/0"
     local NegativeInf = (SerializeMathHuge and "-math.huge") or "-1/0"
     local NewEntryString = (Prettify and "\n") or ""
@@ -1187,24 +1171,24 @@ local function LuaEncode(inputTable, options)
 
     local StackLevel = StackLevelOpt
 
-    -- For pretty printing we need to keep track of the current stack level, then repeat IndentString by that count
+    
     local IndentStringBase = string_rep(" ", IndentCount)
 
-    -- Calculated in the walk loop, based on the current StackLevel
+    
     local IndentString = nil
     local EndingIndentString = nil
 
-    --IndentString = (Prettify and string_rep(IndentString, StackLevel)) or IndentString
-    --local EndingIndentString = (#IndentString > 0 and string_sub(IndentString, 1, -IndentCount - 1)) or ""
+    
+    
 
-    -- For number key values, we want to explicitly serialize the index num ONLY when it needs to be
+    
     local KeyNumIndex = 1
 
-    -- Cases for encoding values, then end setup. Functions are all expected to return a (EncodedKey: string, EncloseInBrackets: boolean)
+    
     local TypeCases = {}
     do
         local function TypeCase(typeName, value, ...)
-            local EncodedValue = TypeCases[typeName](value, false, ...) -- False to label as NOT `isKey`
+            local EncodedValue = TypeCases[typeName](value, false, ...) 
             return EncodedValue
         end
 
@@ -1221,7 +1205,7 @@ local function LuaEncode(inputTable, options)
             return table_concat(EncodedValues, ValueSeperator)
         end
 
-        -- For Roblox's different `Params` data types
+        
         local function Params(newData, params)
             return "(function(p, t) for n, v in next, t do p[n] = v end return p end)(" ..
                 table_concat({ newData, TypeCase("table", params) }, ValueSeperator) ..
@@ -1229,16 +1213,16 @@ local function LuaEncode(inputTable, options)
         end
 
         TypeCases["number"] = function(value, isKey)
-			-- If the number isn't the current real index of the table, we DO want to
-			-- explicitly define it in the serialization no matter what for accuracy
+			
+			
 			if isKey and value == KeyNumIndex then
-				-- ^^ What's EXPECTED unless otherwise explicitly defined, if so, return no encoded num
+				
 				KeyNumIndex = KeyNumIndex + 1
 				return nil, true
 			end
 
-			-- Lua's internal `tostring` handling will denote positive/negativie-infinite number TValues as "inf", which
-			-- makes certain numbers not encode properly. We also just want to make the output precise
+			
+			
 			if value == 1 / 0 then
 				return PositiveInf
 			elseif value == -1 / 0 then
@@ -1247,8 +1231,8 @@ local function LuaEncode(inputTable, options)
 				return "math.pi"
 			end
 
-			-- Provided by felixdm
-			local NumberPacked = string_pack(">n", value) -- gameguy is a boss
+			
+			local NumberPacked = string_pack(">n", value) 
 			local CorrectedNumber = NumberCorrection[NumberPacked]
 			if CorrectedNumber then
 				return CorrectedNumber
@@ -1261,23 +1245,23 @@ local function LuaEncode(inputTable, options)
 				)
 			end
 
-			-- Return fixed-formatted precision num
+			
 			return string_format("%.14g", value)
 		end
 
         TypeCases["string"] = function(value, isKey)
             if isKey and not LuaKeywords[value] and string_match(value, DirectIndexPat) then
-                -- Doesn't need full string def
+                
                 return value, true
             end
 
             return SerializeString(value)
         end
 
-        -- This is NOT used for recursive table serialization, only table-as-key values and Roblox data types that use tables as
-        -- arguments for constructor functions
+        
+        
         TypeCases["table"] = function(value, isKey, stLarpAsRegTable)
-            -- Primarily for tables-as-keys
+            
             if VisitedTables[value] and OutputWarnings then
                 return "{--[[LuaEncode: Duplicate reference]]}"
             end
@@ -1314,7 +1298,7 @@ local function LuaEncode(inputTable, options)
 		end
 
         TypeCases["function"] = function(value)
-			-- We can't serialize functions so we just return a comment block with function information
+			
 			local FunctionName, ArgumentCount, VarArg, Line = debug.info(value, "nal")
 
 			local Arguments = {}
@@ -1348,7 +1332,7 @@ local function LuaEncode(inputTable, options)
 			)
 		end
 
-        ---------- ROBLOX CUSTOM DATA TYPES BELOW ----------
+        
 
         TypeCases["Axes"] = function(value)
             local EncodedArgs = {}
@@ -1368,8 +1352,8 @@ local function LuaEncode(inputTable, options)
         end
 
         TypeCases["BrickColor"] = function(value)
-            -- BrickColor.Number (Its enum ID) will be slightly more efficient in all cases in deser,
-            -- so we'll use it if Options.Prettify is false
+            
+            
             return "BrickColor.new(" ..
                 ((Prettify and TypeCase("string", value.Name)) or value.Number) ..
                 ")"
@@ -1384,10 +1368,10 @@ local function LuaEncode(inputTable, options)
                 SearchKeyword = value.SearchKeyword,
                 MinPrice = value.MinPrice,
                 MaxPrice = value.MaxPrice,
-                SortType = value.SortType,             -- EnumItem
-                CategoryFilter = value.CategoryFilter, -- EnumItem
-                BundleTypes = value.BundleTypes,       -- table
-                AssetTypes = value.AssetTypes          -- table
+                SortType = value.SortType,             
+                CategoryFilter = value.CategoryFilter, 
+                BundleTypes = value.BundleTypes,       
+                AssetTypes = value.AssetTypes          
             })
         end
 
@@ -1407,30 +1391,30 @@ local function LuaEncode(inputTable, options)
             return "DateTime.fromUnixTimestamp(" .. value.UnixTimestamp .. ")"
         end
 
-        -- Properties seem to throw an error on index if the scope isn't a Studio plugin, so we're
-        -- directly getting values! (so fun!!!!)
+        
+        
         TypeCases["DockWidgetPluginGuiInfo"] = function(value)
-            -- e.g.: "InitialDockState:Right InitialEnabled:0 InitialEnabledShouldOverrideRestore:0 FloatingXSize:0 FloatingYSize:0 MinWidth:0 MinHeight:0"
+            
             local ValueString = tostring(value)
 
             return "DockWidgetPluginGuiInfo.new(" ..
                 Args(
-                -- InitialDockState (Enum.InitialDockState)
-                    Enum.InitialDockState[string_match(ValueString, "InitialDockState:(%w+)")],    -- Enum.InitialDockState.Right
-                    -- InitialEnabled and InitialEnabledShouldOverrideRestore (boolean as number; `0` or `1`)
-                    string_match(ValueString, "InitialEnabled:(%w+)") == "1",                      -- false
-                    string_match(ValueString, "InitialEnabledShouldOverrideRestore:(%w+)") == "1", -- false
-                    -- FloatingXSize/FloatingYSize (numbers)
-                    tonumber(string_match(ValueString, "FloatingXSize:(%w+)")),                    -- 0
-                    tonumber(string_match(ValueString, "FloatingYSize:(%w+)")),                    -- 0
-                    -- MinWidth/MinHeight (numbers)
-                    tonumber(string_match(ValueString, "MinWidth:(%w+)")),                         -- 0
-                    tonumber(string_match(ValueString, "MinHeight:(%w+)"))                         -- 0
+                
+                    Enum.InitialDockState[string_match(ValueString, "InitialDockState:(%w+)")],    
+                    
+                    string_match(ValueString, "InitialEnabled:(%w+)") == "1",                      
+                    string_match(ValueString, "InitialEnabledShouldOverrideRestore:(%w+)") == "1", 
+                    
+                    tonumber(string_match(ValueString, "FloatingXSize:(%w+)")),                    
+                    tonumber(string_match(ValueString, "FloatingYSize:(%w+)")),                    
+                    
+                    tonumber(string_match(ValueString, "MinWidth:(%w+)")),                         
+                    tonumber(string_match(ValueString, "MinHeight:(%w+)"))                         
                 ) ..
                 ")"
         end
 
-        -- e.g. `Enum.UserInputType`
+        
         TypeCases["Enum"] = function(value)
             local ValueString = tostring(value)
 
@@ -1440,7 +1424,7 @@ local function LuaEncode(inputTable, options)
             return "Enum[" .. SerializeString(ValueString) .. "]"
         end
 
-        -- e.g. `Enum.UserInputType.Gyro`
+        
         TypeCases["EnumItem"] = function(value)
             local EnumTypeStr = TypeCase("Enum", value.EnumType)
             local EnumName = value.Name
@@ -1451,7 +1435,7 @@ local function LuaEncode(inputTable, options)
             return EnumTypeStr .. "[" .. SerializeString(EnumName) .. "]"
         end
 
-        -- i.e. the `Enum` global return
+        
         TypeCases["Enums"] = function(value)
             return "Enum"
         end
@@ -1459,7 +1443,7 @@ local function LuaEncode(inputTable, options)
         TypeCases["Faces"] = function(value)
             local EncodedArgs = {}
             local EnumValues = {
-                ["Enum.NormalId.Top"] = value.Top, -- These return bools
+                ["Enum.NormalId.Top"] = value.Top, 
                 ["Enum.NormalId.Bottom"] = value.Bottom,
                 ["Enum.NormalId.Left"] = value.Left,
                 ["Enum.NormalId.Right"] = value.Right,
@@ -1484,8 +1468,8 @@ local function LuaEncode(inputTable, options)
             return "Font.new(" .. Args(value.Family, value.Weight, value.Style) .. ")"
         end
 
-        -- Instance refs can be evaluated to their paths (optional), but if parented to
-        -- nil or some DataModel not under `game`, it'll just return nil
+        
+        
         TypeCases["Instance"] = function(value)
 			if UseInstancePaths then
 				local InstancePath, NilFunctionInserted = GetFullPath(value, {
@@ -1501,7 +1485,7 @@ local function LuaEncode(inputTable, options)
 					return InstancePath
 				end
 
-				-- ^^ Now, if the path isn't accessable, falls back to the return below anyway
+				
 			end
 
 			return "nil"
@@ -1573,15 +1557,15 @@ local function LuaEncode(inputTable, options)
             return "Rect.new(" .. Args(value.Min, value.Max) .. ")"
         end
 
-        -- Roblox doesn't provide direct read properties for min/max on `Region3`, but they do on Region3int16..
+        
         TypeCases["Region3"] = function(value)
             local ValuePos = value.CFrame.Position
             local ValueSize = 0.5 * value.Size
 
             return "Region3.new(" ..
                 Args(
-                    ValuePos - ValueSize, -- Minimum
-                    ValuePos + ValueSize  -- Maximum
+                    ValuePos - ValueSize, 
+                    ValuePos + ValueSize  
                 ) ..
                 ")"
         end
@@ -1644,13 +1628,13 @@ local function LuaEncode(inputTable, options)
 
         TypeCases["SharedTable"] = function(value, isKey)
             local StClone = {}
-            -- Will still compile in vanilla Lua if we do it this way. We should probably create a deep clone
-            -- of the current state of the table regardless
+            
+            
             for Key, Value in SharedTable.clone(value, not SharedTableLarpAsRegTable) do
                 StClone[Key] = Value
             end
 
-            local StCloneStr = TypeCases["table"](StClone, isKey, true) -- 3rd arg is stLarpAsRegTable
+            local StCloneStr = TypeCases["table"](StClone, isKey, true) 
             if SharedTableLarpAsRegTable then
                 return StCloneStr
             end
@@ -1658,42 +1642,42 @@ local function LuaEncode(inputTable, options)
         end
 
         TypeCases["userdata"] = function(value)
-            if getmetatable(value) ~= nil then -- Has mt
+            if getmetatable(value) ~= nil then 
                 return "newproxy(true)"
             else
-                return "newproxy()" -- newproxy() defaults to false (no mt)
+                return "newproxy()" 
             end
         end
     end
 
-    -- Setup for final output, which will be concat together
+    
     local Output = {}
 
     local TablePointer = inputTable
-    local NextKey = nil     -- Used with TableStack so the TablePointer loop knows where to continue from upon stack pop
-    local IsNewTable = true -- Used with table stack push/pop to identify when an opening curly brace should be added
+    local NextKey = nil     
+    local IsNewTable = true 
 
-    -- Stack array for table depth
-    local TableStack = {}                   -- [Depth: number] = {TablePointer: table, NextKey: any, KeyNumIndex: number}
-    local RefMaps = { [TablePointer] = "" } -- [Ref: table] = ".example["ref path"]'
-    local CycleMaps = {}                    -- ['.example["ref path"]'] = '.another["ref path"]'
+    
+    local TableStack = {}                   
+    local RefMaps = { [TablePointer] = "" } 
+    local CycleMaps = {}                    
 
     if IsArray then
         NextKey = 1
     end
 
     while TablePointer do
-        -- Update StackLevel for formatting
+        
         StackLevel = StackLevelOpt + #TableStack
         IndentString = (Prettify and string_rep(IndentStringBase, StackLevel)) or IndentStringBase
         EndingIndentString = (#IndentString > 0 and string_sub(IndentString, 1, -IndentCount - 1)) or ""
         
         local HasNextValue = (IsArray and NextKey < TablePointer["n"]) or (not IsArray and next(TablePointer, NextKey) ~= nil)
         
-        -- Only append an opening brace to the table if this isn't just a continution up the stack
+        
         if IsNewTable then
             Output[#Output + 1] = "{"
-        elseif not HasNextValue then -- Formatting for the next entry still needs to be added like any other value
+        elseif not HasNextValue then 
             Output[#Output + 1] = NewEntryString .. EndingIndentString
         else
             Output[#Output + 1] = ","
@@ -1701,7 +1685,7 @@ local function LuaEncode(inputTable, options)
 
         VisitedTables[TablePointer] = true
 
-        -- Just because of control flow restrictions with Lua compatibility
+        
         local SkipStackPop = false
 
         local function WalkTable(Key, Value)
@@ -1712,22 +1696,22 @@ local function LuaEncode(inputTable, options)
             Output[#Output + 1] = NewEntryString .. IndentString
 
             if KeyTypeCase and ValueTypeCase then
-                local ValueWasEncoded = false -- Keeping track of this for adding a "," to the output if needed
+                local ValueWasEncoded = false 
 
-                -- Evaluate output for key
+                
                 local KeyEncodedSuccess, EncodedKeyOrError, DontEncloseKeyInBrackets = pcall(KeyTypeCase, Key,
-                    true) -- The `true` represents if it's a key or not, here it is
+                    true) 
 
-                -- Evaluate output for value, ignoring 2nd arg (`DontEncloseInBrackets`) because this isn't the key
+                
                 local ValueEncodedSuccess, EncodedValueOrError
                 if not ValueIsTable then
                     ValueEncodedSuccess, EncodedValueOrError = pcall(ValueTypeCase, Value, false)
                 end
 
-                -- Ignoring `if EncodedKeyOrError` because the key doesn't actually need to ALWAYS
-                -- be explicitly encoded, like if it's a number of the current key index!
+                
+                
                 if KeyEncodedSuccess and (ValueIsTable or (ValueEncodedSuccess and EncodedValueOrError)) then
-                    -- Append explicit key if necessary
+                    
                     if EncodedKeyOrError then
                         if DontEncloseKeyInBrackets then
                             Output[#Output + 1] = EncodedKeyOrError
@@ -1738,7 +1722,7 @@ local function LuaEncode(inputTable, options)
                         Output[#Output + 1] = EqualsSeperator
                     end
 
-                    -- Of course, recursive tables are handled differently and use the stack system
+                    
                     if ValueIsTable then
                         local IndexPath
                         if InsertCycles and KeyIndexTypes[KeyType] and RefMaps[TablePointer] then
@@ -1760,12 +1744,12 @@ local function LuaEncode(inputTable, options)
                             TablePointer = Value
                             NextKey = nil
                             KeyNumIndex = 1
-                            IsArray = false -- Nested tables are not treated as arrays with 'n' field
+                            IsArray = false 
 
                             IsNewTable = true
                             SkipStackPop = true
 
-                            return false -- break
+                            return false 
                         else
                             EncodedValueOrError = string_format(
                                 "{%s}",
@@ -1778,13 +1762,13 @@ local function LuaEncode(inputTable, options)
                         end
                     end
 
-                    -- Append value like normal
+                    
                     Output[#Output + 1] = EncodedValueOrError
 
                     ValueWasEncoded = true
-                elseif OutputWarnings then -- Then `Encoded(Key/Value)OrError` is the error msg
-                    -- ^^ Then either the key or value wasn't properly checked or encoded, and there
-                    -- was an error we need to log!
+                elseif OutputWarnings then 
+                    
+                    
                     local ErrorMessage = string_format(
                         "LuaEncode: Failed to serialize %s of data type %s: %s",
                         (not KeyEncodedSuccess and "key") or (not ValueEncodedSuccess and "value") or "key/value",
@@ -1799,15 +1783,15 @@ local function LuaEncode(inputTable, options)
 
                 local HasNextValue = (IsArray and Key < TablePointer["n"]) or (not IsArray and next(TablePointer, Key) ~= nil)
                 if not HasNextValue then
-                    -- If there isn't another value after the current index, add ending formatting
+                    
                     Output[#Output + 1] = NewEntryString .. EndingIndentString
                 elseif ValueWasEncoded then
                     Output[#Output + 1] = ","
                 end
             else
-                -- Data type is unimplemented
+                
 
-                -- Dtc
+                
                 local KeyTostring = (KeyType == "userdata" and "userdata") or
                     tostring(Key)
                 local ValueTostring = (ValueType == "userdata" and "userdata") or
@@ -1829,7 +1813,7 @@ local function LuaEncode(inputTable, options)
         end
 
         if IsArray then
-            -- When returning from a nested table, continue from NextKey + 1 instead of 1
+            
             local StartIndex = IsNewTable and 1 or (NextKey + 1)
             for Index = StartIndex, TablePointer["n"] do
                 local Success = WalkTable(Index, rawget(TablePointer, Index))
@@ -1846,7 +1830,7 @@ local function LuaEncode(inputTable, options)
             end
         end
 
-        -- Vanilla Lua control flow is fun
+        
         if not SkipStackPop then
             if not Prettify and IndentCount > 0 then
                 Output[#Output + 1] = IndentString
@@ -1855,7 +1839,7 @@ local function LuaEncode(inputTable, options)
 
             if #TableStack > 0 then
                 local TableUp = TableStack[#TableStack]
-                TableStack[#TableStack] = nil -- Pop off the table stack
+                TableStack[#TableStack] = nil 
 
                 TablePointer, NextKey, KeyNumIndex, IsArray = TableUp[1], TableUp[2], TableUp[3], TableUp[4]
                 IsNewTable = false
@@ -1894,7 +1878,7 @@ export type CallInfo = {
 	CreationTime: number,
 	Origin: BaseScript?,
 	Function: (
-		...any
+...any
 	) -> any | {
 		Address: string,
 		Name: string,
@@ -1981,7 +1965,7 @@ local GetEventReferenceCode = [[local function GetEventReference(options)
 	return Value
 end]]
 
---// Pasted from Dex (maximum detection)
+
 for i = 0, 31 do
 	CodeGen.CleanTable[string.char(i)] = "\\" .. string.format("%03d", i)
 end
@@ -2357,7 +2341,7 @@ function CodeGen:BuildHookCode(CallInfo: CallInfo)
 
 	if Type == "Incoming" then
 		if DoesUseCallbackValue(CallInfo.Instance) then
-			-- Callback/Invoke returned value
+			
 			if CallInfo.OriginalInvokeArgs then
 				if CallInfo.IsCallbackReturn then
 					return CodeGenHeader
@@ -2447,7 +2431,7 @@ end)]],
 					)
 			end
 
-			-- Callback value
+			
 			return CodeGenHeader
 				.. WrapCodeInActor(
 					string.format(
@@ -2558,12 +2542,12 @@ function CreateArgsString(SerializedArgs: string, Args: { [number]: any, n: numb
 		return ""
 	end
 
-	--// Cyclic Table Handler \\--
+	
 	if string.sub(SerializedArgs, 1, 9) == "(function" then
 		return `{Prefix == nil and "" or Prefix}table.unpack({SerializedArgs}, 1, {Args.n})`
 	end
 
-	--// Normal Table Handler \\--
+	
 	return `{Prefix == nil and "" or Prefix}{string.sub(SerializedArgs, 2, #SerializedArgs - 1)}`
 end
 
@@ -2816,7 +2800,7 @@ end)() end,
 	Dragging = false,
 	Frame = nil,
 	FramePosition = nil,
-	FrameSize = nil, -- Added to store initial frame size
+	FrameSize = nil, 
 	StartPosition = nil,
 	ChangedConnection = nil,
 	Callback = nil,
@@ -2840,7 +2824,7 @@ local function DefaultCallback(_, Input: InputObject)
 	)
 end
 
-function Drag.Setup(Frame: GuiObject, DragFrame: GuiObject, Callback: (Info: {}, Input: InputObject) -> () | nil)
+function Drag.Setup(Frame: GuiObject, DragFrame: GuiObject, Callback: ((Info: {}, Input: InputObject) -> () )| nil)
 	Callback = Callback or DefaultCallback
 
 	DragFrame.InputBegan:Connect(function(Input: InputObject)
@@ -2884,7 +2868,7 @@ end)() end,
     [28] = function()local wax,script,require=ImportGlobals(28)local ImportGlobals return (function(...)local Log = {}
 Log.__index = Log
 
---// Auto Ignore Constants \\--
+
 local SpamCallCountThreshold = 15
 local SpamTimeWindowSeconds = 1
 
@@ -2975,7 +2959,7 @@ local function RunInterceptors(Interceptors: { (...any) -> (...any) }, Info: any
 end
 
 function Log:Call(RawInfo)
-	--// Instance Path Caching \\--
+	
 	if
 		wax.shared.SaveManager:GetState("CacheInstancePaths", false)
 		and self.Instance.IsDescendantOf(self.Instance, game)
@@ -2983,28 +2967,28 @@ function Log:Call(RawInfo)
 		RawInfo.Path = self.Instance.GetFullName(self.Instance)
 	end
 
-	--// Ratelimiting \\--
+	
 	local Success, Data = pcall(function()
 		return self:IsOverSpamThreshold()
 	end)
 
 	if Success and Data then return end
 
-	--// Info stuff \\--
+	
 	local Info = DeepClone(RawInfo)
 	Info.CreationTime = tick()
 
-	--// Plugin Interceptors \\--
+	
 	local PluginManager = wax.shared.CobaltPluginManager
 	if PluginManager and PluginManager.HasInterceptors then
-		-- Run Instance-specific interceptors (both exact type and "All")
+		
 		local InstanceIntercept = PluginManager.Registry.Interceptors.Instance[self.Instance]
 		if InstanceIntercept then
 			if InstanceIntercept[self.Type] and RunInterceptors(InstanceIntercept[self.Type], Info, self) then return end
 			if InstanceIntercept["All"] and RunInterceptors(InstanceIntercept["All"], Info, self) then return end
 		end
 
-		-- Run Global interceptors (both exact type and "All")
+		
 		local GlobalByType = PluginManager.Registry.Interceptors.Global[self.Type]
 		if GlobalByType and RunInterceptors(GlobalByType, Info, self) then return end
 
@@ -3012,7 +2996,7 @@ function Log:Call(RawInfo)
 		if GlobalAll and RunInterceptors(GlobalAll, Info, self) then return end
 	end
 	
-	--// Update Log \\--
+	
 	local Index = #self.Calls + 1
 	self.Calls[Index] = Info
 	if not Info.IsExecutor then
@@ -3316,7 +3300,7 @@ function Adonis.Bypass()
 
 	for _, Adonis in AdonisTables do
 		for _, DetectionFunc in Adonis do
-			-- Just in case they already loaded a custom anticheat bypass for adonis
+			
 			if typeof(DetectionFunc) ~= "function" or isfunctionhooked(DetectionFunc) then
 				continue
 			end
@@ -3668,16 +3652,16 @@ local CodeGen = require(script.Parent.Parent.Utils.CodeGen.Generator)
 
 local Hooks = script.Parent.Hooks
 
--- Main Thread Hooks
+
 for _, Hook in Hooks.Default:GetChildren() do
 	task.spawn(require, Hook)
 end
 
 getgenv().CobaltInitialized = true
 
--- Actors use a different lua vm
--- This means that our main thread metatable hooks dont apply in the actor's vm
--- So we need to set up the hooks again in the actor lua vm in order to log everything
+
+
+
 local ActorsUtils = script.Parent.Actors
 
 wax.shared.ActorsEnabled = (
@@ -3714,7 +3698,7 @@ if wax.shared.ActorsEnabled then
 
 	ActorEnvironmentCode = ActorEnvironmentCode:gsub("COBALT_ACTOR_DATA", ActorData)
 
-	-- Actor Logs Sync Layer
+	
 	local function ReconstructTable(Info, CyclicRefs)
 		local Reconstructed = {}
 
@@ -3729,7 +3713,7 @@ if wax.shared.ActorsEnabled then
 					continue
 				end
 
-				-- Check for Cobalt Created Object
+				
 				if not Value["__CyclicRef"] then
 					Reconstructed[Key] = ReconstructTable(Value, CyclicRefs)
 					continue
@@ -3793,7 +3777,7 @@ if wax.shared.ActorsEnabled then
 			local ReconstructedInfo = ReconstructTable(RawInfo, CyclicRefs)
 			ReconstructedInfo.Blocked = true
 
-			--// Reconstruct Packed Arguments (BindableEvents omit ["n"] for unknown reason) \\--
+			
 			ReconstructedInfo.Arguments = ReconstructPacked(ReconstructedInfo.Arguments)
 			ReconstructedInfo.OriginalInvokeArgs = ReconstructPacked(ReconstructedInfo.OriginalInvokeArgs)
 
@@ -3802,7 +3786,7 @@ if wax.shared.ActorsEnabled then
 		elseif not Log.Ignored then
 			local ReconstructedInfo = ReconstructTable(RawInfo, CyclicRefs)
 
-			--// Reconstruct Packed Arguments (BindableEvents omit ["n"] for unknown reason) \\--
+			
 			ReconstructedInfo.Arguments = ReconstructPacked(ReconstructedInfo.Arguments)
 			ReconstructedInfo.OriginalInvokeArgs = ReconstructPacked(ReconstructedInfo.OriginalInvokeArgs)
 
@@ -3811,7 +3795,7 @@ if wax.shared.ActorsEnabled then
 		end
 	end))
 
-	-- Actor Hooking Code Generation
+	
 	local CodeToRun = ActorEnvironmentCode
 
 	for _, ActorHook in Hooks.Actors:GetChildren() :: { StringValue } do
@@ -3828,11 +3812,11 @@ if wax.shared.ActorsEnabled then
 		"end)",
 	}, "\n")
 
-	-- Actual Hooking Logic
-	-- The hooking code wont run again if cobalt is already initialized in that Actor (to address deleted actors aka LuaStateProxy stuff)
+	
+	
 
-	-- `HookActor` is to address Volcano returning non initialized actors inside their `getactors` function.
-	-- God this code is so ass 🥹
+	
+	
 	local function HookActor(TargetActor: Actor)
 		local Hooked = false
 		local Attempts = 0
@@ -3914,16 +3898,16 @@ local function GetLog(Instance: InstancesToHook, Method: MethodsToHook, Function
 	return Log
 end
 
---[[
-	Individually logs an incoming remote call.
 
-	@param Instance The instance that was called.
-	@param Method The method that was called (e.g., "OnClientEvent").
-	@param Function The function that was called, if applicable.
-	@param Info The information about the call, including arguments and origin. Can be nil.
-	@param ... The arguments passed from the server to the client.
-	@return boolean, Log? Returns true if the call was blocked, plus the log when one was used.
-]]
+
+
+
+
+
+
+
+
+
 local function LogRemote(
 	Instance: InstancesToHook,
 	Method: MethodsToHook,
@@ -3957,13 +3941,13 @@ local function LogRemote(
 	return false, Log
 end
 
---[[
-	Creates a function that can be used to pass to `Connect` which will log all the incoming calls. It will additonally add the function to a ignore list (`LogConnectionFunctions`) to prevent unneccessary logging.
-	
-	@param Instance The instance to log.
-	@param Method The method to log (e.g., "OnClientEvent").
-	@return function Returns a function that logs all calls to the given instance and method.
-]]
+
+
+
+
+
+
+
 local function CreateConnectionFunction(Instance: InstancesToHook, Method: MethodsToHook)
 	local ConnectionFunction = function(...)
 		local HasLoggedRegular = false
@@ -3982,8 +3966,8 @@ local function CreateConnectionFunction(Instance: InstancesToHook, Method: Metho
 			end
 
 			if not Origin and Function then
-				-- ts is unreliable because people could js set the script global to nil
-				-- if only debug.getinfo(Function).source or debug.info(Function, "s") returned an Instance...
+				
+				
 
 				local Script = rawget(getfenv(Function), "script")
 				if typeof(Script) == "Instance" then
@@ -4019,24 +4003,24 @@ local function CreateConnectionFunction(Instance: InstancesToHook, Method: Metho
 	return ConnectionFunction
 end
 
---[[
-	Creates a function that can be used to pass to callbacks (.OnInvoke & .OnClientInvoke) which will log all the incoming calls.
-	
-	@param Instance The instance to log.
-	@param Method The method to log (e.g., "OnClientEvent").
-	@param Function The original callback of the RemoteFunction
-	@return function Returns a function that logs all function calls to the given instance and method.
-]]
+
+
+
+
+
+
+
+
 local function CreateCallbackDetour(Instance: InstancesToHook, Method: MethodsToHook, Callback: (...any) -> ...any)
 	local Detour = function(...)
 		local Origin = nil
 
-		-- May not exist in all executors
+		
 		if getscriptfromthread then
 			Origin = getscriptfromthread(coroutine.running())
 		end
 
-		-- Unreliable method to get script.
+		
 		if not Origin then
 			local Script = rawget(getfenv(Callback), "script")
 			if typeof(Script) == "Instance" then
@@ -4094,11 +4078,11 @@ local function CreateCallbackDetour(Instance: InstancesToHook, Method: MethodsTo
 	return Detour
 end
 
---[[
-	Handles setting up logging for the appropriate instances.
 
-	@param Instance The instance to handle.
-]]
+
+
+
+
 local function HandleInstance(Instance: any)
 	if
 		not ClassesToHook[Instance.ClassName]
@@ -4341,12 +4325,12 @@ end
 return AssetManager
 
 end)() end,
-    [29] = function()local wax,script,require=ImportGlobals(29)local ImportGlobals return (function(...)--[[
+    [29] = function()local wax,script,require=ImportGlobals(29)local ImportGlobals return (function(...)
 
-Pagination Module
-made by deivid and turned into module by upio
 
-]]
+
+
+
 
 local Pagination = {}
 Pagination.__index = Pagination
@@ -4451,10 +4435,10 @@ function Pagination:GetVisualInfo(Page: number?)
 		end
 		Result[ItemCount + 1] = "ellipsis"
 		Result[ItemCount + 2] = TotalPages
-		--return MergeTables(LeftRange, "ellipsis", TotalPages)
+		
 		return Result
 	elseif FakeLeft and not FakeRight then
-		--local RightRange = CreateArray(TotalPages - ItemCount + 1, TotalPages)
+		
 		Result[1] = 1
 		Result[2] = "ellipsis"
 
@@ -4466,7 +4450,7 @@ function Pagination:GetVisualInfo(Page: number?)
 
 		return Result
 	elseif FakeLeft and FakeRight then
-		--local MiddleRange = CreateArray(LeftSibling, RightSibling)
+		
 		Result[1] = 1
 		Result[2] = "ellipsis"
 		local Index = 3
@@ -4480,10 +4464,10 @@ function Pagination:GetVisualInfo(Page: number?)
 		Result[Index + 1] = TotalPages
 
 		return Result
-		--return MergeTables(1, "ellipsis", MiddleRange, "ellipsis", TotalPages)
+		
 	end
 
-	--return CreateArray(1, TotalPages)
+	
 	for i = 1, TotalPages do
 		Result[i] = i
 	end
@@ -4567,7 +4551,7 @@ local DefaultProperties = {
 	},
 }
 
-function Interface.New(ClassName: string, Properties: { [string | number]: any })
+function Interface.New(ClassName: string, Properties: { [(string | number)]: any })
 	local Object = Instance.new(ClassName)
 
 	for Key, Value in pairs(DefaultProperties[ClassName] or {}) do
@@ -4637,12 +4621,12 @@ end
 return Interface
 
 end)() end,
-    [41] = function()local wax,script,require=ImportGlobals(41)local ImportGlobals return (function(...)--[[
+    [41] = function()local wax,script,require=ImportGlobals(41)local ImportGlobals return (function(...)
 
-Luau syntax highlighter with studio colors
-Based on: https://devforum.roblox.com/t/realtime-richtext-lua-syntax-highlighting/2500399
 
-]]
+
+
+
 
 local Highlighter = {
 	Colors = {
@@ -4903,12 +4887,12 @@ local CORNER_HANDLE_SIZE = 20
 
 function Resize.new(Options: {
 	MainFrame: Frame,
-	MinimumSize: Vector2? | UDim2?,
+	MinimumSize: (Vector2? )| UDim2?,
 	MaximumSize: UDim2?,
 	HandleSize: number?,
 	CornerHandleSize: number?,
 	Mirrored: boolean?,
-	LockedPosition: boolean? | UDim2?,
+	LockedPosition: (boolean? )| UDim2?,
 })
 	local MainFrame = Options.MainFrame
 	local HandleSize = Options.HandleSize or HANDLE_SIZE
@@ -4990,22 +4974,22 @@ function Resize.new(Options: {
 			end
 			return finalNewSize, finalNewPosition
 		else
-			-- Non-mirrored logic
+			
 			local currentScreenGuiAbsSize = self.ScreenGui.AbsoluteSize
-			local parentAbsSizeForMinMax = currentScreenGuiAbsSize -- As per original non-mirrored logic for min/max context
+			local parentAbsSizeForMinMax = currentScreenGuiAbsSize 
 
-			-- These will store the final UDim offset values for position and the absolute pixel values for size calculation
+			
 			local finalPosOffsetX = initialFramePosition.X.Offset
 			local finalPosOffsetY = initialFramePosition.Y.Offset
 
-			-- Initial absolute pixel size of the frame
+			
 			local initialAbsWidthPx = initialFrameSize.X.Scale * self.Parent.AbsoluteSize.X + initialFrameSize.X.Offset
 			local initialAbsHeightPx = initialFrameSize.Y.Scale * self.Parent.AbsoluteSize.Y + initialFrameSize.Y.Offset
 
 			local newAbsWidthPx = initialAbsWidthPx
 			local newAbsHeightPx = initialAbsHeightPx
 
-			-- Min/max pixel dimensions
+			
 			local minWidthPx = MinimumSize.X.Scale * parentAbsSizeForMinMax.X + MinimumSize.X.Offset
 			local minHeightPx = MinimumSize.Y.Scale * parentAbsSizeForMinMax.Y + MinimumSize.Y.Offset
 			local maxWidthPx = MaximumSize and (MaximumSize.X.Scale * parentAbsSizeForMinMax.X + MaximumSize.X.Offset)
@@ -5013,16 +4997,16 @@ function Resize.new(Options: {
 			local maxHeightPx = MaximumSize and (MaximumSize.Y.Scale * parentAbsSizeForMinMax.Y + MaximumSize.Y.Offset)
 				or math.huge
 
-			-- Original edge calculation logic (assuming MainFrame.Position is center if AnchorPoint is 0.5,0.5 for these calcs)
+			
 			local initialAbsCenterX = currentScreenGuiAbsSize.X * initialFramePosition.X.Scale
 				+ initialFramePosition.X.Offset
-			local initialAbsSizeX_forEdgeCalc = initialFrameSize.X.Offset -- Original code used offset for this part of edge calculation
+			local initialAbsSizeX_forEdgeCalc = initialFrameSize.X.Offset 
 			local initialRightEdgeX = initialAbsCenterX + initialAbsSizeX_forEdgeCalc / 2
 			local initialLeftEdgeX = initialAbsCenterX - initialAbsSizeX_forEdgeCalc / 2
 
 			local initialAbsCenterY = currentScreenGuiAbsSize.Y * initialFramePosition.Y.Scale
 				+ initialFramePosition.Y.Offset
-			local initialAbsSizeY_forEdgeCalc = initialFrameSize.Y.Offset -- Original code used offset for this part of edge calculation
+			local initialAbsSizeY_forEdgeCalc = initialFrameSize.Y.Offset 
 			local initialBottomEdgeY = initialAbsCenterY + initialAbsSizeY_forEdgeCalc / 2
 			local initialTopEdgeY = initialAbsCenterY - initialAbsSizeY_forEdgeCalc / 2
 
@@ -5030,18 +5014,18 @@ function Resize.new(Options: {
 				if resizeTypeX == "Left" then
 					local newLeftEdge = initialLeftEdgeX + mouseDelta.X
 					newAbsWidthPx = math.clamp(initialRightEdgeX - newLeftEdge, minWidthPx, maxWidthPx)
-					if newAbsWidthPx ~= (initialRightEdgeX - newLeftEdge) then -- Readjust edge if clamped
+					if newAbsWidthPx ~= (initialRightEdgeX - newLeftEdge) then 
 						newLeftEdge = initialRightEdgeX - newAbsWidthPx
 					end
 					if not LockedPosition then
-						local newAbsCenterX = newLeftEdge + newAbsWidthPx / 2 -- Assuming center is halfway for position update
+						local newAbsCenterX = newLeftEdge + newAbsWidthPx / 2 
 						finalPosOffsetX = newAbsCenterX - currentScreenGuiAbsSize.X * initialFramePosition.X.Scale
 					end
 				elseif resizeTypeX == "Right" then
 					local newRightEdge = initialRightEdgeX + mouseDelta.X
 					newAbsWidthPx = math.clamp(newRightEdge - initialLeftEdgeX, minWidthPx, maxWidthPx)
 					if not LockedPosition then
-						local newAbsCenterX = initialLeftEdgeX + newAbsWidthPx / 2 -- Assuming center is halfway
+						local newAbsCenterX = initialLeftEdgeX + newAbsWidthPx / 2 
 						finalPosOffsetX = newAbsCenterX - currentScreenGuiAbsSize.X * initialFramePosition.X.Scale
 					end
 				end
@@ -5051,33 +5035,33 @@ function Resize.new(Options: {
 				if resizeTypeY == "Top" then
 					local newTopEdge = initialTopEdgeY + mouseDelta.Y
 					newAbsHeightPx = math.clamp(initialBottomEdgeY - newTopEdge, minHeightPx, maxHeightPx)
-					if newAbsHeightPx ~= (initialBottomEdgeY - newTopEdge) then -- Readjust edge if clamped
+					if newAbsHeightPx ~= (initialBottomEdgeY - newTopEdge) then 
 						newTopEdge = initialBottomEdgeY - newAbsHeightPx
 					end
 					if not LockedPosition then
-						local newAbsCenterY = newTopEdge + newAbsHeightPx / 2 -- Assuming center is halfway
+						local newAbsCenterY = newTopEdge + newAbsHeightPx / 2 
 						finalPosOffsetY = newAbsCenterY - currentScreenGuiAbsSize.Y * initialFramePosition.Y.Scale
 					end
 				elseif resizeTypeY == "Bottom" then
 					local newBottomEdge = initialBottomEdgeY + mouseDelta.Y
 					newAbsHeightPx = math.clamp(newBottomEdge - initialTopEdgeY, minHeightPx, maxHeightPx)
 					if not LockedPosition then
-						local newAbsCenterY = initialTopEdgeY + newAbsHeightPx / 2 -- Assuming center is halfway
+						local newAbsCenterY = initialTopEdgeY + newAbsHeightPx / 2 
 						finalPosOffsetY = newAbsCenterY - currentScreenGuiAbsSize.Y * initialFramePosition.Y.Scale
 					end
 				end
 			end
 
-			-- Convert final absolute pixel dimensions back to UDim offsets for size
+			
 			local finalSizeOffsetX = newAbsWidthPx - (initialFrameSize.X.Scale * self.Parent.AbsoluteSize.X)
 			local finalSizeOffsetY = newAbsHeightPx - (initialFrameSize.Y.Scale * self.Parent.AbsoluteSize.Y)
 
 			local finalNewSize =
 				UDim2.new(initialFrameSize.X.Scale, finalSizeOffsetX, initialFrameSize.Y.Scale, finalSizeOffsetY)
-			local finalNewPosition = initialFramePosition -- Default if LockedPosition is true
+			local finalNewPosition = initialFramePosition 
 			if typeof(LockedPosition) == "UDim2" then
 				finalNewPosition = LockedPosition
-			elseif not LockedPosition then -- Only update if not locked (boolean false)
+			elseif not LockedPosition then 
 				finalNewPosition = UDim2.new(
 					initialFramePosition.X.Scale,
 					finalPosOffsetX,
@@ -5223,16 +5207,16 @@ end
 return SaveManager
 
 end)() end,
-    [45] = function()local wax,script,require=ImportGlobals(45)local ImportGlobals return (function(...)--[[[
+    [45] = function()local wax,script,require=ImportGlobals(45)local ImportGlobals return (function(...)
 
-Sonner Luau Port by upio
-Original Sonner by Emil Kowalski (https://sonner.emilkowal.ski/)
 
-TODO (which will almost probably never be done):
- - Add a way to view the previous notifications (hovering over the notifs but im lazy)
- - Handle too many notifications breaking the UI
- - Fix inconsistant notification positioning
-]]
+
+
+
+
+
+
+
 
 local Sonner = {
 	Queue = {},
@@ -5350,7 +5334,7 @@ local function InternalToast(image, text, internalTime, removeCallback)
 
 		object.ZIndex = 500 - (#Sonner.Queue - index)
 
-		-- shift them down
+		
 		wax.shared.TweenService
 			:Create(object.UIScale, Sonner.TweenInfo, {
 				Scale = object.UIScale.Scale * ScaleMultiplier,
@@ -5478,8 +5462,8 @@ function Sonner.promise(func, options)
 		task.spawn(function()
 			setthreadidentity(8)
 
-			-- The thread identity is 8 when setting it on the parent thread (Sonner.promise), but it still lacks capabilities when running another child thread
-			-- Capabilities here should pass from a thread to another... Could be an upstream (executor) issue ?
+			
+			
 
 			Animations.FadeOut(notif.ImageLabel, 0.15)
 			wax.shared.TweenService
@@ -5628,11 +5612,11 @@ local NamecallMethods = CreateLookupTable({
 })
 local AllowedClassNames = CreateLookupTable({ "RemoteEvent", "RemoteFunction", "UnreliableRemoteEvent", "BindableEvent", "BindableFunction" })
 
---[[
-	Returns the calling function via `debug.info`
 
-	@return `function | nil` The calling function or nil if not found.
-]]
+
+
+
+
 local function getcallingfunction()
 	local BaseLevel = if wax.shared.ExecutorSupport["oth"].IsWorking then 2 else 4
 
@@ -5652,11 +5636,11 @@ local function getcallingfunction()
 	return debug.info(BaseLevel, "f")
 end
 
---[[
-	Returns the calling line of the script that called the function via `debug.info`
 
-	@return number Returns the line number of the calling script.
-]]
+
+
+
+
 local function getcallingline()
 	local BaseLevel = if wax.shared.ExecutorSupport["oth"].IsWorking then 2 else 4
 
@@ -5676,11 +5660,11 @@ local function getcallingline()
 	return debug.info(BaseLevel, "l")
 end
 
---[[
-	Returns the calling source of the script that called the function via `debug.info`
 
-	@return string Returns the source of the calling script.
-]]
+
+
+
+
 local function getcallingsource()
 	local BaseLevel = if wax.shared.ExecutorSupport["oth"].IsWorking then 2 else 4
 
@@ -5700,7 +5684,7 @@ local function getcallingsource()
 	return debug.info(BaseLevel, "s")
 end
 
--- metamethod hooks
+
 wax.shared.NamecallHook = wax.shared.Hooking.HookMetaMethod(game, "__namecall", function(...)
 	local self = ...
 	local Method = getnamecallmethod()
@@ -5736,7 +5720,7 @@ wax.shared.NamecallHook = wax.shared.Hooking.HookMetaMethod(game, "__namecall", 
 			return
 		elseif not Log.Ignored then
 			Log:Call(Info)
-			-- For RemoteFunction return value (ex: local result = RemoteFunction:InvokeServer())
+			
 			if self.ClassName == "RemoteFunction" and (Method == "InvokeServer" or Method == "invokeServer") then
 				Log = wax.shared.Logs.Incoming[self]
 				if not Log then
@@ -5782,7 +5766,7 @@ wax.shared.NamecallHook = wax.shared.Hooking.HookMetaMethod(game, "__namecall", 
 	return wax.shared.NamecallHook(...)
 end)
 
--- function hooks
+
 local FunctionsToHook
 do
 	local BindableFunction = Instance.new("BindableFunction")
@@ -5844,7 +5828,7 @@ for _, Function in next, FunctionsToHook do
 				return
 			elseif not Log.Ignored then
 				Log:Call(Info)
-				-- For RemoteFunction return value (ex: local result = RemoteFunction:InvokeServer())
+				
 				if self.ClassName == "RemoteFunction" and (Method == "InvokeServer" or Method == "invokeServer") then
 					Log = wax.shared.Logs.Incoming[self]
 					if not Log then
@@ -6022,17 +6006,17 @@ end
 
 return FileHelper
 end)() end,
-    [26] = function()local wax,script,require=ImportGlobals(26)local ImportGlobals return (function(...)-- Logger
--- ActualMasterOogway
--- December 8, 2024
+    [26] = function()local wax,script,require=ImportGlobals(26)local ImportGlobals return (function(...)
 
---[=[
-    A simple logging utility that writes messages to a file. Supports different log levels
-    and can be configured to overwrite or append to the log file.
 
-    Log Format:  2024-12-04T15:28:31.131Z,0.131060,MyThread,Warning [FLog::RobloxStarter] Roblox stage ReadyForFlagFetch completed
-                 <timestamp>,<elapsed_time>,<thread_id>,<level> <message>
-]=]
+
+
+
+
+
+
+
+
 
 local Logger = {}
 Logger.__index = Logger
@@ -6064,13 +6048,13 @@ local function createDirectoryRecursive(path)
 	end
 end
 
---[=[
-    Generates a unique file name for the log file. The file name is based on the current
-    job ID, ensuring it is unique per server instance but consistent across multiple
-    executions within the same server.
 
-    @return string A unique file name for the log file.
-]=]
+
+
+
+
+
+
 function Logger:GenerateFileName()
 	local JobIdNumber = game.JobId:gsub("%D", "")
 	local timestamp = os.date("!%Y%m%d%H%M%S")
@@ -6078,14 +6062,14 @@ function Logger:GenerateFileName()
 	return `{self.logFileDirectory}/{JobIdNumber * 1.7 // 1.8}_{timestamp}.log`
 end
 
---[=[
-    Creates a new Logger instance.
 
-    @param logFilePath string The path to the log file.
-    @param logLevel number The minimum log level to write to the file. Defaults to INFO.
-    @param overwrite boolean Whether to overwrite the log file or append to it. Defaults to false (append).
-    @return Logger A new Logger instance.
-]=]
+
+
+
+
+
+
+
 function Logger.new(logFilePath: string, logLevel: number?, overwrite: boolean?)
 	local self = setmetatable({}, Logger)
 	self.logFilePath = logFilePath
@@ -6111,13 +6095,13 @@ function Logger.new(logFilePath: string, logLevel: number?, overwrite: boolean?)
 	return self
 end
 
---[=[
-    Logs a message to the file.
 
-    @param level number The log level of the message.
-    @param threadId string The ID of the thread or source of the log message.
-    @param message string The message to log.
-]=]
+
+
+
+
+
+
 function Logger:Log(level: number, threadId: string, message: string)
 	if level <= self.logLevel then
 		local levelStr = LOG_LEVEL_STRINGS[level]
@@ -6134,51 +6118,51 @@ function Logger:Log(level: number, threadId: string, message: string)
 	end
 end
 
---[=[
-    Logs a debug message.
 
-    @param threadId string The ID of the thread or source of the log message.
-    @param message string The message to log.
-]=]
+
+
+
+
+
 function Logger:Debug(threadId: string, message: string)
 	self:Log(Logger.LOG_LEVELS.DEBUG, threadId, message)
 end
 
---[=[
-    Logs an info message.
 
-    @param threadId string The ID of the thread or source of the log message.
-    @param message string The message to log.
-]=]
+
+
+
+
+
 function Logger:Info(threadId: string, message: string)
 	self:Log(Logger.LOG_LEVELS.INFO, threadId, message)
 end
 
---[=[
-    Logs a warning message.
 
-    @param threadId string The ID of the thread or source of the log message.
-    @param message string The message to log.
-]=]
+
+
+
+
+
 function Logger:Warning(threadId: string, message: string)
 	self:Log(Logger.LOG_LEVELS.WARNING, threadId, message)
 end
 
---[=[
-    Logs an error message.
 
-    @param threadId string The ID of the thread or source of the log message.
-    @param message string The message to log.
-]=]
+
+
+
+
+
 function Logger:Error(threadId: string, message: string)
 	self:Log(Logger.LOG_LEVELS.ERROR, threadId, message)
 end
 
 return Logger
 end)() end,
-    [46] = function()local wax,script,require=ImportGlobals(46)local ImportGlobals return (function(...)--[[
-	Main Window Logic for cobalt, all UI elements are created and managed here.
-]]
+    [46] = function()local wax,script,require=ImportGlobals(46)local ImportGlobals return (function(...)
+
+
 
 local AnticheatData = require(script.Parent.Utils.Anticheats.Main)
 local LuaEncode = require(script.Parent.Utils.Serializer.LuaEncode)
@@ -6233,7 +6217,7 @@ local Images = {
 	BindableFunction = "rbxassetid://112264959079193",
 }
 
--- Functions
+
 local function UpdateLogNameSize(Log)
 	local TextSizeX, _TextSizeY =
 		wax.shared.GetTextBounds("x" .. #Log.Calls, Log.Button.Calls.FontFace, Log.Button.Calls.TextSize)
@@ -6246,7 +6230,7 @@ local function GetDPIScale()
 end
 wax.shared.GetDPIScale = GetDPIScale
 
--- ContentProvider PreloadAsync bypass
+
 Images = AssetManager.GetRemoteImages(Images)
 
 local CobaltLogo = AssetManager.GetImage("Logo")
@@ -6310,7 +6294,7 @@ do
 	end)
 end
 
--- Resizing
+
 Resize.new({
 	MainFrame = MainFrame,
 
@@ -6320,7 +6304,7 @@ Resize.new({
 	HandleSize = 6,
 })
 
--- Context Menus
+
 local CurrentContext
 local ContextMenu = Interface.New("Frame", {
 	AutomaticSize = Enum.AutomaticSize.XY,
@@ -6555,7 +6539,7 @@ local function CreateContextMenu(Parent: GuiObject, Options: {}, MouseOnCursorPo
 	return ContextData
 end
 
--- Sonner toast
+
 local SonnerUI = Interface.New("ScrollingFrame", {
 	Name = "Sonner",
 	BackgroundTransparency = 1,
@@ -6571,7 +6555,7 @@ local SonnerUI = Interface.New("ScrollingFrame", {
 
 wax.shared.Sonner.init(SonnerUI)
 
--- Modal
+
 local OpenedModal
 local ModalBackground = Interface.New("TextButton", {
 	BackgroundColor3 = Color3.fromRGB(0, 0, 0),
@@ -6696,7 +6680,7 @@ local function CreateModalTop(Title: string, Icon: string, Parent: GuiObject)
 	return ModalTitle, ModalIcon
 end
 
--- Settings
+
 local SettingsFrame = Interface.New("TextButton", {
 	AnchorPoint = Vector2.new(0.5, 0.5),
 	BackgroundColor3 = Color3.fromRGB(10, 10, 10),
@@ -6756,7 +6740,7 @@ local SettingsScrollingFrame = Interface.New("ScrollingFrame", {
 	},
 })
 
--- Plugins
+
 local PluginsFrame = Interface.New("TextButton", {
 	AnchorPoint = Vector2.new(0.5, 0.5),
 	BackgroundColor3 = Color3.fromRGB(10, 10, 10),
@@ -6819,7 +6803,7 @@ local PluginsScrollingFrame = Interface.New("ScrollingFrame", {
 local SettingsBuilder = {}
 local SectionBuilder = {}
 do
-	-- Builders
+	
 	SettingsBuilder.__index = SettingsBuilder
 	SectionBuilder.__index = SectionBuilder
 
@@ -6836,7 +6820,7 @@ do
 		}, SectionBuilder)
 	end
 
-	-- Sections Constructor
+	
 	function SettingsBuilder:CreateSection(SectionName: string, DataSavePrefix: string?)
 		local Section = Interface.New("Frame", {
 			AutomaticSize = Enum.AutomaticSize.Y,
@@ -6863,8 +6847,8 @@ do
 		return SectionBuilder.new(Section, DataSavePrefix)
 	end
 
-	-- Creates a horizontal sub-row inside a section and returns a SectionBuilder for it.
-	-- Use this when you want multiple elements side-by-side (e.g. two buttons in one row).
+	
+	
 	function SectionBuilder:CreateRow(Padding: UDim?)
 		local Row = Interface.New("Frame", {
 			BackgroundTransparency = 1,
@@ -6894,7 +6878,7 @@ do
 		})
 	end
 
-	-- Section Element Constructors
+	
 	function SectionBuilder:CreateButton(Text: string, Callback: () -> (), TextSize: number?)
 		local Button = Interface.New("TextButton", {
 			BackgroundColor3 = Color3.fromRGB(15, 15, 15),
@@ -6935,7 +6919,7 @@ do
 		Idx: string,
 		Options: {
 			Text: string,
-			Callback: (boolean) -> () | nil,
+			Callback: ((boolean) -> () )| nil,
 			Default: boolean?,
 		}
 	)
@@ -7053,7 +7037,7 @@ do
 		Idx: string,
 		Options: {
 			Text: string,
-			Callback: (string) -> () | nil,
+			Callback: ((string) -> () )| nil,
 			Default: string?,
 			Placeholder: string?,
 			ClearTextOnFocus: boolean?,
@@ -7228,7 +7212,7 @@ do
 			AllowNull: boolean?,
 			Values: { [any]: any },
 			Default: any | { [any]: any },
-			Callback: (any) -> () | nil,
+			Callback: ((any) -> () )| nil,
 			Text: string,
 		}
 	)
@@ -7525,7 +7509,7 @@ do
 		Idx: string,
 		Options: {
 			Text: string,
-			Callback: (any) -> () | nil,
+			Callback: ((any) -> () )| nil,
 			NullMessage: string,
 		}
 	)
@@ -7748,7 +7732,7 @@ do
 		Parent = HeaderLabel,
 	})
 
-	-- Container that holds all per-plugin cards
+	
 	local PluginCardsContainer = Interface.New("Frame", {
 		AutomaticSize = Enum.AutomaticSize.Y,
 		BackgroundTransparency = 1,
@@ -7782,7 +7766,7 @@ do
 			},
 		})
 
-		-- Left accent bar
+		
 		Interface.New("Frame", {
 			AnchorPoint = Vector2.new(0, 0.5),
 			BackgroundColor3 = AccentColor,
@@ -7813,7 +7797,7 @@ do
 			},
 		})
 
-		-- Title row: name + badge
+		
 		local TitleRow = Interface.New("Frame", {
 			AutomaticSize = Enum.AutomaticSize.Y,
 			BackgroundTransparency = 1,
@@ -7838,7 +7822,7 @@ do
 			Parent = TitleRow,
 		})
 
-		-- Status badge (only shown for errors)
+		
 		if IsError then
 			local Badge = Interface.New("Frame", {
 				AutomaticSize = Enum.AutomaticSize.XY,
@@ -7870,7 +7854,7 @@ do
 			})
 		end
 
-		-- Meta line (version · author  OR  file path)
+		
 		if Meta ~= "" then
 			Interface.New("TextLabel", {
 				Text = Meta,
@@ -7887,7 +7871,7 @@ do
 			})
 		end
 
-		-- Body (description or error message)
+		
 		if Body ~= "" then
 			Interface.New("TextLabel", {
 				Text = Body,
@@ -7914,7 +7898,7 @@ do
 		local LoadedCount = #Registry.Plugins
 		local ErrorCount  = #Registry.Errored
 
-		-- Update summary label
+		
 		local SummaryParts = {}
 		if LoadedCount > 0 then
 			table.insert(SummaryParts, `<font color="#37b964"><b>{LoadedCount}</b></font> loaded`)
@@ -7928,7 +7912,7 @@ do
 		SummaryLabel.RichText = true
 		SummaryLabel.Text = table.concat(SummaryParts, `<font transparency="0.6"> · </font>`)
 
-		-- Errored plugins first (most actionable)
+		
 		for _, ErrorInfo in Registry.Errored do
 			local FileName = string.match(ErrorInfo.FilePath, "([^/]+)$") or ErrorInfo.FilePath
 			local Title = ErrorInfo.Name or FileName
@@ -7938,7 +7922,7 @@ do
 			CreatePluginCard(true, Title, Meta, ErrorInfo.Error)
 		end
 
-		-- Loaded plugins
+		
 		for _, PluginInfo in Registry.Plugins do
 			local Data = PluginInfo.PluginData
 			local Name = Data.Name or "Unknown"
@@ -7950,8 +7934,8 @@ do
 	end)
 end
 
--- Main Settings
--- God this warning box code is so ass 🥀
+
+
 if #wax.shared.ExecutorSupport.FailedChecks.NonEssential > 0 then
 	local WarningDisplay = Interface.New("Frame", {
 		AnchorPoint = Vector2.new(1, 0.5),
@@ -8331,11 +8315,11 @@ LoggingSection:CreateButton("Export Logs to HTML", function()
 	wax.shared.Sonner.promise(function(UpdateProgress)
 		assert(typeof(writefile) == "function", "Exploit does not support writefile")
 		
-		--// Collect all logs \\--
+		
 		local AllCalls = SessionExporter:FetchAllLogs()
 		local SessionData = SessionExporter:GetSessionData(AllCalls)
 
-		--// Data Processing \\--
+		
 		UpdateProgress("Sorting calls...")
 		SessionExporter:SortCalls(AllCalls)
 		local Events, StringMap = SessionExporter:ProcessCalls(
@@ -8344,7 +8328,7 @@ LoggingSection:CreateButton("Export Logs to HTML", function()
 			UpdateProgress
 		)
 
-		--// Export \\--
+		
 		local FileName = `Cobalt_Session_{os.time()}.html`
 		writefile(
 			FileName,
@@ -8408,7 +8392,7 @@ for Order, Data in pairs(Credits) do
 	})
 end
 
--- Info
+
 local InfoFrame = Interface.New("TextButton", {
 	AnchorPoint = Vector2.new(0.5, 0.5),
 	BackgroundColor3 = Color3.fromRGB(10, 10, 10),
@@ -8475,7 +8459,7 @@ local InfoTabs = Interface.New("Frame", {
 	},
 })
 
--- Right gradient (always visible)
+
 Interface.New("Frame", {
 	AnchorPoint = Vector2.new(1, 0),
 	Position = UDim2.new(1, -6, 0, 44),
@@ -8493,7 +8477,7 @@ Interface.New("Frame", {
 	},
 })
 
--- Left gradient (only visible after scrolling)
+
 local LeftGradient = Interface.New("Frame", {
 	Position = UDim2.new(0, 4, 0, 44),
 	Size = UDim2.new(0, 30, 0, 36),
@@ -9152,7 +9136,7 @@ local FunctionInfoText = Interface.New("TextLabel", {
 	Parent = FunctionScrollingFrame,
 })
 
--- Search
+
 local ResultInfo = {}
 local CurrentResults = {}
 local SelectedResult = -1
@@ -9250,7 +9234,7 @@ local SearchFilterList = Interface.New("ScrollingFrame", {
 	},
 })
 
--- Search Filter
+
 local ExcludeSearchClass = {}
 local SearchFilterButtons = {}
 
@@ -9448,7 +9432,7 @@ local function CreateSearchResult(Instance: Instance, Type: string)
 	return SearchResult
 end
 
--- Topbar
+
 local TopBar = Interface.New("Frame", {
 	BackgroundColor3 = Color3.fromRGB(25, 25, 25),
 	Size = UDim2.new(1, 0, 0, 36),
@@ -9473,7 +9457,7 @@ local TopBar = Interface.New("Frame", {
 })
 Interface.HideCorner(TopBar, UDim2.fromScale(1, 0.5), Vector2.yAxis)
 
--- Topbar Buttons
+
 local TopButtons = Interface.New("Frame", {
 	BackgroundTransparency = 1,
 	Size = UDim2.fromScale(1, 1),
@@ -9493,7 +9477,7 @@ local TopButtons = Interface.New("Frame", {
 	Parent = TopBar,
 })
 
-local function CreateTopButton(IconName, Order: number, Callback: () -> ()?)
+local function CreateTopButton(IconName, Order: number, Callback: (() -> ())?)
 	local Button = Interface.New("ImageButton", {
 		LayoutOrder = Order,
 		Size = UDim2.fromScale(1, 1),
@@ -9578,7 +9562,7 @@ end)
 Drag.Setup(MainFrame, TopBar)
 Drag.Setup(ShowButton, ShowButton)
 
--- Remote List
+
 local LeftList = Interface.New("Frame", {
 	BackgroundTransparency = 1,
 	AnchorPoint = Vector2.yAxis,
@@ -9594,7 +9578,7 @@ local LeftList = Interface.New("Frame", {
 	},
 })
 
--- Tabs
+
 local RemoteTabContainer = Interface.New("Frame", {
 	BackgroundColor3 = Color3.fromRGB(25, 25, 25),
 	Size = UDim2.new(1, 0, 0, 30),
@@ -9611,7 +9595,7 @@ local RemoteTabContainer = Interface.New("Frame", {
 	},
 })
 
--- Remote List
+
 local RemoteListWrapper = Interface.New("Frame", {
 	AnchorPoint = Vector2.yAxis,
 	BackgroundColor3 = Color3.fromRGB(25, 25, 25),
@@ -9686,7 +9670,7 @@ do
 	end)
 end
 
--- Main Remote thing
+
 local LogsWrapper = Interface.New("Frame", {
 	AnchorPoint = Vector2.one,
 	BackgroundTransparency = 1,
@@ -9739,7 +9723,7 @@ local LogsPagination = Interface.New("Frame", {
 	},
 })
 
--- Functions
+
 
 function ShowTab(Tab)
 	for _, Object in pairs(RemoteList:GetChildren()) do
@@ -9833,7 +9817,7 @@ ShowCalls = function(Log, Page)
 		if wax.shared.Settings.ShowExecutorLogs.Value then
 			Call = Log.Calls[Index]
 		else
-			Call = Log.Calls[Log.GameCalls[Index]]
+			Call = Log.Calls[Log.GameCalls[Index] ]
 		end
 
 		if not Call then
@@ -10518,11 +10502,11 @@ function CreateCallFrame(CallInfo)
 	return CallFrame
 end
 
--- UI Handling
+
 CreateRemoteTab("Outgoing", true, wax.shared.Logs.Outgoing)
 CreateRemoteTab("Incoming", false, wax.shared.Logs.Incoming)
 
--- Search Functions
+
 function OpenSearch()
 	OpenModal(SearchFrame)
 	UpdateSearch()
@@ -10579,7 +10563,7 @@ function SelectResult(NewResult, UpdateCanvasPosition)
 	end
 end
 function EnterResult(ResultIndex)
-	local Info = ResultInfo[CurrentResults[SelectedResult]]
+	local Info = ResultInfo[CurrentResults[SelectedResult] ]
 	if not Info then
 		CloseModal()
 		return
@@ -10614,7 +10598,7 @@ end
 
 SearchBox:GetPropertyChangedSignal("Text"):Connect(UpdateSearch)
 
--- Call Functions
+
 function OpenInfo(CallInfo)
 	if wax.shared.CobaltPluginManager and wax.shared.CobaltPluginManager.Initialized then
 		for _, Interceptor in wax.shared.CobaltPluginManager.Registry.UIHooks.RemoteInfo.Intercept do
@@ -10837,12 +10821,12 @@ local UIHelper = require(UIUtils.Helper)
 local Signals = require(script.Parent.Parent.Signal)
 local CodeGen = require(script.Parent.Parent.CodeGen.Generator)
 
--- File Helper
+
 local FileHelperUtil = require(script.Parent.Parent.FileHelper)
 
 local PluginFiles = FileHelperUtil.new("Cobalt/Plugins")
 
--- Templates
+
 local TemplatePluginData = {
     Name = "Untitled Plugin",
     Description = "No description provided.",
@@ -10851,13 +10835,13 @@ local TemplatePluginData = {
     Game = "*",
 }
 
---[[
-    Validates plugin data against a template.
 
-    @param Data: The plugin data to validate.
-    @param Template: The template to validate against.
-    @return: The validated plugin data.
-]]
+
+
+
+
+
+
 local function Validate(Data, Template)
     local NewData = {}
     for Key, Value in Template do
@@ -10870,13 +10854,13 @@ local function Validate(Data, Template)
     return NewData
 end
 
--- Helpers
---[[
-    Handles a plugin error.
 
-    @param FilePath: The path to the plugin file.
-    @param Error: The error message.
-]]
+
+
+
+
+
+
 local function PluginErrored(FilePath, Error)
     if #Manager.Registry.Errored == 0 then
         wax.shared.Sonner.error(`Failed to load plugin: {FilePath}.`)
@@ -10915,16 +10899,16 @@ local function PluginErrored(FilePath, Error)
     end
 end
 
---[[
-    Creates a plugin environment for a plugin.
 
-    @param FilePath: The path to the plugin file.
-    @param PluginCallback: The plugin callback function.
-    @param PluginThread: The plugin thread.
-    @return: The plugin environment.
-]]
+
+
+
+
+
+
+
 local function CreatePluginEnvironement(FilePath: string, PluginCallback: (...any) -> (...any), PluginThread: thread)
-    -- Setup global Cobalt table
+    
     local Cobalt = {
         Sonner = wax.shared.Sonner,
         UI = { RemoteInfo = {}, ContextMenu = {} },
@@ -10933,7 +10917,7 @@ local function CreatePluginEnvironement(FilePath: string, PluginCallback: (...an
         ExecutorSupport = wax.shared.ExecutorSupport
     }
     
-    -- Settings Proxy
+    
     Cobalt.Settings = setmetatable({}, {
         __index = function(_, key)
             return wax.shared.SaveManager:GetState(key, false)
@@ -10945,12 +10929,12 @@ local function CreatePluginEnvironement(FilePath: string, PluginCallback: (...an
 
     local CurrentPluginData = nil
     local CurrentPluginSettings = nil
-    --[[
-        Binds a callback to fire when this plugin is unloaded.
+    
+    
 
-        @param Callback: The function to call on unload.
-    ]]
-    function Cobalt:BindToUnload(Callback: () -> ())
+
+
+function Cobalt:BindToUnload(Callback: () -> ())
         for _, Plugin in Manager.Registry.Plugins do
             if Plugin.PluginData == CurrentPluginData then
                 table.insert(Plugin.UnloadCallbacks, Callback)
@@ -10959,25 +10943,25 @@ local function CreatePluginEnvironement(FilePath: string, PluginCallback: (...an
         end
     end
 
-    -- UI Functions
-    --[[
-        Gets the currently selected remote instance in the UI.
+    
+    
+    
 
-        @return: The selected remote instance and its type.
-    ]]
-    function Cobalt.UI:GetSelectedRemote()
+
+
+function Cobalt.UI:GetSelectedRemote()
         local Log = wax.shared.GetCurrentLog()
         return Log and Log.Instance or nil, Log and Log.Type or nil
     end
 
-    --[[
-        Creates a custom blank modal.
+    
+    
 
-        @param Title: The title of the modal.
-        @param Icon: The icon of the modal (Lucide icon).
-        @return: The modal interface with Open(), Close(), OnClose() and the Content Frame.
-    ]]
-    function Cobalt.UI:CreateModal(Title: string, Icon: string)
+
+
+
+
+function Cobalt.UI:CreateModal(Title: string, Icon: string)
         local ModalFrame = Interface.New("TextButton", {
             AnchorPoint = Vector2.new(0.5, 0.5),
             BackgroundColor3 = Color3.fromRGB(10, 10, 10),
@@ -11231,12 +11215,12 @@ local function CreatePluginEnvironement(FilePath: string, PluginCallback: (...an
         return ModalInterface
     end
 
-    --[[
-        Creates a plugin settings tab, (visible after clicking a plugin in the plugins list)
+    
+    
 
-        @return: The plugin settings tab.
-    ]]
-    function Cobalt.UI:CreatePluginSettings()
+
+
+function Cobalt.UI:CreatePluginSettings()
         if not CurrentPluginSettings then
             CurrentPluginSettings = wax.shared.PluginSettings:CreateSection(CurrentPluginData.Name, `PluginSettings-{CurrentPluginData.Name}-`)
         end
@@ -11244,26 +11228,26 @@ local function CreatePluginEnvironement(FilePath: string, PluginCallback: (...an
         return CurrentPluginSettings
     end
     
-    --[[
-        Creates a remote info tab, (visible after clicking a remote)
+    
+    
 
-        @param TabName: The name of the tab.
-        @param Icon: The icon of the tab.
-        @return: The tab content and tab UI.
-    ]]
-    function Cobalt.UI.RemoteInfo:CreateTab(TabName: string, Icon: string)
+
+
+
+
+function Cobalt.UI.RemoteInfo:CreateTab(TabName: string, Icon: string)
         local TabUI, TabContent = wax.shared.CreateTabContent()
         wax.shared.CreateRemoteInfoTab(Icon, TabName, TabUI)
         
         return TabContent, TabUI
     end
 
-    --[[
-        Disables the default footer buttons for a specific Remote Info tab.
+    
+    
 
-        @param TabName: The name of the tab to disable default buttons for.
-    ]]
-    function Cobalt.UI.RemoteInfo:DisableDefaultButtons(TabName: string)
+
+
+function Cobalt.UI.RemoteInfo:DisableDefaultButtons(TabName: string)
         local TabRegistry = Manager.Registry.UIHooks.RemoteInfo.Tabs[TabName]
         		if not TabRegistry then
 			Manager.Registry.UIHooks.RemoteInfo.Tabs[TabName] = { DisableDefaults = true, Buttons = {} }
@@ -11276,24 +11260,24 @@ local function CreatePluginEnvironement(FilePath: string, PluginCallback: (...an
 		end
 	end
 
-    --[[
-		Empty function that gets hooked by Window.luau.
-		When called, it forces the RemoteInfo footer buttons to update.
-	]]
-	function Cobalt.UI.RemoteInfo.UpdateFooterButtons()
-		-- Hooked by Window.luau
+    
+	
+
+
+function Cobalt.UI.RemoteInfo.UpdateFooterButtons()
+		
 	end
 
-	--[[
-		Adds a custom footer button to a specific Remote Info tab.
+	
+	
 
-		@param TabName: The name of the tab to add the button to.
-		@param Icon: The icon of the button (Lucide icon name).
-		@param Title: The title text of the button.
-		@param Options: The dropdown menu options for the button.
-		@return: A function to remove the button.
-	]]
-	function Cobalt.UI.RemoteInfo:AddFooterButton(TabName: string, Icon: string, Title: string, Options: {})
+
+
+
+
+
+
+function Cobalt.UI.RemoteInfo:AddFooterButton(TabName: string, Icon: string, Title: string, Options: {})
 		local TabRegistry = Manager.Registry.UIHooks.RemoteInfo.Tabs[TabName]
 		if not TabRegistry then
 			TabRegistry = { DisableDefaults = false, Buttons = {} }
@@ -11328,13 +11312,13 @@ local function CreatePluginEnvironement(FilePath: string, PluginCallback: (...an
 		end
 	end
     
-    --[[
-        Binds a function to be called when a remote is opened in the remote info tab.
+    
+    
 
-        @param Callback: The function to be called.
-        @return: A function to remove the binded callback.
-    ]]
-    function Cobalt.UI.RemoteInfo:BindToModalOpen(Callback: (CallInfo: CodeGen.CallInfo) -> (...any))
+
+
+
+function Cobalt.UI.RemoteInfo:BindToModalOpen(Callback: (CallInfo: CodeGen.CallInfo) -> (...any))
         table.insert(Manager.Registry.UIHooks.RemoteInfo.Open, Callback)
 
         return function()
@@ -11345,14 +11329,14 @@ local function CreatePluginEnvironement(FilePath: string, PluginCallback: (...an
         end
     end
 
-    --[[
-        Adds an interceptor to conditionally prevent a remote info modal from opening.
-        The callback should return `false` to block the modal from opening, or `true`/`nil` to allow it.
+    
+    
 
-        @param Callback: The function to be called before opening the modal.
-        @return: A function to remove the added interceptor.
-    ]]
-    function Cobalt.UI.RemoteInfo:InterceptModalOpen(Callback: (CallInfo: CodeGen.CallInfo) -> (boolean?))
+
+
+
+
+function Cobalt.UI.RemoteInfo:InterceptModalOpen(Callback: (CallInfo: CodeGen.CallInfo) -> (boolean?))
         table.insert(Manager.Registry.UIHooks.RemoteInfo.Intercept, Callback)
 
         return function()
@@ -11363,16 +11347,16 @@ local function CreatePluginEnvironement(FilePath: string, PluginCallback: (...an
         end
     end
 
-    --[[
-        Adds a custom context menu option to specific elements of the UI.
-        
-        @param MenuType: "RemoteList" | "CallList"
-        @param Icon: The Lucide icon string
-        @param Title: The string title
-        @param Callback: The function to run when clicked. Passes either Log or CallInfo depending on MenuType.
-        @return: A function that removes the registered option when called.
-    ]]
-    function Cobalt.UI.ContextMenu:AddOption(MenuType: "RemoteList" | "CallList", Icon: string, Title: string, Callback: (InteractionData: any) -> ())
+    
+    
+
+
+
+
+
+
+
+function Cobalt.UI.ContextMenu:AddOption(MenuType: "RemoteList" | "CallList", Icon: string, Title: string, Callback: (InteractionData: any) -> ())
         if not Manager.Registry.UIHooks.ContextMenus[MenuType] then
             warn(`[Cobalt] Invalid MenuType provided to ContextMenu:AddOption. Expected RemoteList | CallList, got {tostring(MenuType)}`)
             return function() end
@@ -11394,31 +11378,31 @@ local function CreatePluginEnvironement(FilePath: string, PluginCallback: (...an
         end
     end
 
-    --[[
-        Uses cobalt's built-in syntax highlighter to colorize Luau code in RichText.
+    
+    
 
-        @param code: The Luau code to colorize.
-        @return: The colorized Luau code.
-    ]]
-    function Cobalt.UI.ColorizeLuauCode(code: string)
+
+
+
+function Cobalt.UI.ColorizeLuauCode(code: string)
         return Highlighter.Run(code)
     end
 
-    -- Merge Interface functions
+    
     for Idx, Value in Interface do
         Cobalt.UI[Idx] = Value
     end
 
-    -- Spy Functions
+    
     type InterceptorFunction = (Info: CodeGen.CallInfo, Instance: Instance, Type: "Incoming" | "Outgoing") -> (...any)
-    --[[
-        Intercepts executed calls.
+    
+    
 
-        @param Type: The type of calls to intercept.
-        @param Data: The data to intercept.
-        @return: A function to remove the interceptor.
-    ]]
-    function Cobalt.Spy:InterceptExecutedCalls(Type: "Incoming" | "Outgoing" | "All", Data: {
+
+
+
+
+function Cobalt.Spy:InterceptExecutedCalls(Type: "Incoming" | "Outgoing" | "All", Data: {
         Callback: InterceptorFunction,
         Instance: Instance | nil,
     } | InterceptorFunction)
@@ -11432,21 +11416,21 @@ local function CreatePluginEnvironement(FilePath: string, PluginCallback: (...an
         local IsInstanceSpecific = Options.Instance ~= nil
         
         if IsInstanceSpecific then
-            -- Ensure Instance specific
+            
             local InstanceInterceptors = Manager.Registry.Interceptors.Instance[Options.Instance]
             if not InstanceInterceptors then
                 Manager.Registry.Interceptors.Instance[Options.Instance] = {}
                 InstanceInterceptors = Manager.Registry.Interceptors.Instance[Options.Instance]
             end
 
-            -- Ensure Direction specific (Incoming, Outgoing, All)
+            
             if not InstanceInterceptors[Type] then
                 InstanceInterceptors[Type] = {}
             end
 
             table.insert(InstanceInterceptors[Type], Options.Callback)
         else
-            -- Ensure Global Direction specific (Incoming, Outgoing, All)
+            
             local GlobalInterceptors = Manager.Registry.Interceptors.Global[Type]
             if not GlobalInterceptors then
                 Manager.Registry.Interceptors.Global[Type] = {}
@@ -11456,7 +11440,7 @@ local function CreatePluginEnvironement(FilePath: string, PluginCallback: (...an
             table.insert(GlobalInterceptors, Options.Callback)
         end
 
-        -- Cleanup function
+        
         return function()
             if IsInstanceSpecific then
                 if not Options.Instance then
@@ -11491,24 +11475,24 @@ local function CreatePluginEnvironement(FilePath: string, PluginCallback: (...an
         end
     end
 
-    --[[
-        Clears the tracked logs, optionally filtering by instance or type.
+    
+    
 
-        @param Instance: The optional instance to clear logs for.
-        @param Type: The optional type to clear logs for (Incoming, Outgoing, All).
-    ]]
-    function Cobalt.Spy:ClearLogs(Instance: Instance?, Type: string?)
+
+
+
+function Cobalt.Spy:ClearLogs(Instance: Instance?, Type: string?)
         wax.shared.ClearLogs(Instance, if Type == "All" then nil else Type)
     end
 
-    --[[
-        Appends mock execution data or external logs into the tracking system.
+    
+    
 
-        @param Instance: The remote instance to append the log to.
-        @param Type: The type of log (Incoming, Outgoing).
-        @param Data: The execution data table payload.
-    ]]
-    function Cobalt.Spy:AppendLog(Instance: Instance, Type: "Incoming" | "Outgoing", Data: {})
+
+
+
+
+function Cobalt.Spy:AppendLog(Instance: Instance, Type: "Incoming" | "Outgoing", Data: {})
         local Method = wax.shared.FunctionForClasses[Type][Instance.ClassName]
         local Log = wax.shared.Logs[Type][Instance] or wax.shared.NewLog(Instance, Type, Method, nil)
 
@@ -11520,25 +11504,25 @@ local function CreatePluginEnvironement(FilePath: string, PluginCallback: (...an
         wax.shared.Communicator.Fire(wax.shared.Communicator, Instance, Type, #Log.Calls)
     end
 
-    --[[
-        Gets the log for a specific instance and type.
+    
+    
 
-        @param instance: The instance to get the log for.
-        @param type: The type of log to get.
-        @return: The log for the specific instance and type.
-    ]]
-    function Cobalt:GetLog(instance: Instance, type: "Incoming" | "Outgoing")
+
+
+
+
+function Cobalt:GetLog(instance: Instance, type: "Incoming" | "Outgoing")
         return wax.shared.Logs[type][instance]
     end
 
-    --[[
-        Intercepts code generation.
+    
+    
 
-        @param Type: The type of code generation to intercept.
-        @param Callback: The callback to execute when code generation is intercepted. If callback returns a string, it will be used as the generated code instead of the default generated code. If callback returns nil, the default generated code will be used.
-        @return: A function to remove the interceptor.
-    ]]
-    function Cobalt.CodeGen:InterceptGeneration(Type: "Call" | "Hook" | "InstancePath", Callback: (Info: any, ...any) -> (...any))
+
+
+
+
+function Cobalt.CodeGen:InterceptGeneration(Type: "Call" | "Hook" | "InstancePath", Callback: (Info: any,...any) -> (...any))
         Manager.HasCodeGenInterceptors = true
         
         local Interceptors = Manager.Registry.UIHooks.CodeGen[Type]
@@ -11554,14 +11538,14 @@ local function CreatePluginEnvironement(FilePath: string, PluginCallback: (...an
         end
     end
 
-    --[[
-        Serializes data to a string.
+    
+    
 
-        @param data: The data to serialize.
-        @param options: The options to use for serialization.
-        @return: The serialized data.
-    ]]
-    function Cobalt.CodeGen.Serialize(data, options)
+
+
+
+
+function Cobalt.CodeGen.Serialize(data, options)
         if typeof(data) == "table" then
             return wax.shared.LuaEncode(data, options)
         elseif typeof(data) == "Instance" then
@@ -11571,40 +11555,40 @@ local function CreatePluginEnvironement(FilePath: string, PluginCallback: (...an
         return UIHelper.QuickSerializeArgument(data)      
     end
 
-    --[[
-        Indents code.
+    
+    
 
-        @param str: The code to indent.
-        @param indent: The amount of indentation to add.
-        @return: The indented code.
-    ]]
-    function Cobalt.CodeGen.Indent(str: string, indent: number)
+
+
+
+
+function Cobalt.CodeGen.Indent(str: string, indent: number)
         return CodeGen:IndentCode(str, indent)
     end
 
-    -- Handle Cobalt.PluginData assignment
+    
     setmetatable(Cobalt, {
         __newindex = function(_, Key, Value)
-            --[[
-            Example:
+            
+            
 
-            ```lua
-            Cobalt.PluginData = {
-		        Name = "ByteNet",
-		        Description = "Adds ByteNet support to Cobalt.",
-                Author = "upio",
-                Version = "1.0.0",
-		        Game = "*" -- Can be place id string or table of place ids
-	        }
-            ```
 
-            Case insensitive to allow camelCase and PascalCase
-            ]]
-            if Key:lower() == "plugindata" then
+
+
+
+
+
+
+
+
+
+
+
+if Key:lower() == "plugindata" then
                 local PluginData = Validate(Value, TemplatePluginData)
                 local IsSupported = true
                 
-                -- Check if plugin is supported in this game
+                
                 if type(PluginData.Game) == "string" then
                     if PluginData.Game ~= "*" and tostring(game.PlaceId) ~= PluginData.Game and tostring(game.GameId) ~= PluginData.Game then
                         IsSupported = false
@@ -11627,14 +11611,14 @@ local function CreatePluginEnvironement(FilePath: string, PluginCallback: (...an
                 if not IsSupported then
                     PluginErrored(FilePath, "Plugin is not supported in this game.")
                     
-                    -- Cancel Plugin Thread
+                    
                     if coroutine.status(PluginThread) ~= "dead" then
                         pcall(task.cancel, PluginThread)
                     end
                     return
                 end
 
-                -- Register Plugin
+                
                 table.insert(Manager.Registry.Plugins, {
                     FilePath = FilePath,
                     PluginData = PluginData,
@@ -11655,12 +11639,12 @@ local function CreatePluginEnvironement(FilePath: string, PluginCallback: (...an
     })
 end
 
---[[
-    Sets up all plugins.
-]]
+
+
+
 function Manager.SetupPlugins()
 	for _, FilePath in PluginFiles:ListFiles() do
-        -- Load Plugin
+        
 		local Plugin, CompileError = loadstring(
             PluginFiles:ReadFile(FilePath),
             `CobaltPlugin-{PluginFiles:GetFileName(FilePath)}`
@@ -11670,7 +11654,7 @@ function Manager.SetupPlugins()
 			continue
 		end
 
-        -- Register Plugin
+        
         local PluginThread = task.spawn(function()
             coroutine.yield()
 
@@ -11680,10 +11664,10 @@ function Manager.SetupPlugins()
             end
         end)
 
-        -- Set Plugin Environement
+        
         setfenv(Plugin, CreatePluginEnvironement(FilePath, Plugin, PluginThread))
 
-        -- Start Plugin
+        
         coroutine.resume(PluginThread)
 	end
 
@@ -11776,9 +11760,9 @@ end
 return Hooking
 
 end)() end
-} -- [RefId] = Closure
+} 
 
--- Holds the actual DOM data
+
 local ObjectTree = {
     {
         1,
@@ -12135,7 +12119,7 @@ local ObjectTree = {
     }
 }
 
--- Line offsets for debugging (only included when minifyTables is false)
+
 local LineOffsets = {
     8,
     393,
@@ -12168,19 +12152,19 @@ local LineOffsets = {
     [27] = 11682
 }
 
--- Misc AOT variable imports
+
 local WaxVersion = "0.4.1"
 local EnvName = "Cobalt"
 
--- ++++++++ RUNTIME IMPL BELOW ++++++++ --
 
--- Localizing certain libraries and built-ins for runtime efficiency
+
+
 local string, task, setmetatable, error, next, table, unpack, coroutine, script, type, require, pcall, tostring, tonumber, _VERSION =
       string, task, setmetatable, error, next, table, unpack, coroutine, script, type, require, pcall, tostring, tonumber, _VERSION
 
 local table_insert = table.insert
 local table_remove = table.remove
-local table_freeze = table.freeze or function(t) return t end -- lol
+local table_freeze = table.freeze or function(t) return t end 
 
 local coroutine_wrap = coroutine.wrap
 
@@ -12188,8 +12172,8 @@ local string_sub = string.sub
 local string_match = string.match
 local string_gmatch = string.gmatch
 
--- The Lune runtime has its own `task` impl, but it must be imported by its builtin
--- module path, "@lune/task"
+
+
 if _VERSION and string_sub(_VERSION, 1, 4) == "Lune" then
     local RequireSuccess, LuneTaskLib = pcall(require, "@lune/task")
     if RequireSuccess and LuneTaskLib then
@@ -12199,12 +12183,12 @@ end
 
 local task_defer = task and task.defer
 
--- If we're not running on the Roblox engine, we won't have a `task` global
+
 local Defer = task_defer or function(f, ...)
     coroutine_wrap(f)(...)
 end
 
--- ClassName "IDs"
+
 local ClassNameIdBindings = {
     [1] = "Folder",
     [2] = "ModuleScript",
@@ -12213,21 +12197,21 @@ local ClassNameIdBindings = {
     [5] = "StringValue",
 }
 
-local RefBindings = {} -- [RefId] = RealObject
+local RefBindings = {} 
 
 local ScriptClosures = {}
-local ScriptClosureRefIds = {} -- [ScriptClosure] = RefId
+local ScriptClosureRefIds = {} 
 local StoredModuleValues = {}
 local ScriptsToRun = {}
 
--- wax.shared __index/__newindex
+
 local SharedEnvironment = {}
 
--- We're creating 'fake' instance refs soley for traversal of the DOM for require() compatibility
--- It's meant to be as lazy as possible
-local RefChildren = {} -- [Ref] = {ChildrenRef, ...}
 
--- Implemented instance methods
+
+local RefChildren = {} 
+
+
 local InstanceMethods = {
     GetFullName = { {}, function(self)
         local Path = self.Name
@@ -12236,7 +12220,7 @@ local InstanceMethods = {
         while ObjectPointer do
             Path = ObjectPointer.Name .. "." .. Path
 
-            -- Move up the DOM (parent will be nil at the end, and this while loop will stop)
+            
             ObjectPointer = ObjectPointer.Parent
         end
 
@@ -12278,8 +12262,8 @@ local InstanceMethods = {
 
         if recursive then
             for Child in next, Children do
-                -- Yeah, Roblox follows this behavior- instead of searching the entire base of a
-                -- ref first, the engine uses a direct recursive call
+                
+                
                 return Child:FindFirstChild(name, true)
             end
         end
@@ -12296,13 +12280,13 @@ local InstanceMethods = {
         end
     end},
 
-    -- Just to implement for traversal usage
+    
     WaitForChild = { {"string", "number?"}, function(self, name)
         return self:FindFirstChild(name)
     end},
 }
 
--- "Proxies" to instance methods, with err checks etc
+
 local InstanceMethodProxies = {}
 for MethodName, MethodObject in next, InstanceMethods do
     local Types = MethodObject[1]
@@ -12339,15 +12323,15 @@ for MethodName, MethodObject in next, InstanceMethods do
 end
 
 local function CreateRef(className, name, parent)
-    -- `name` and `parent` can also be set later by the init script if they're absent
+    
 
-    -- Extras
+    
     local StringValue_Value
 
-    -- Will be set to RefChildren later aswell
+    
     local Children = setmetatable({}, {__mode = "k"})
 
-    -- Err funcs
+    
     local function InvalidMember(member)
         error(member .. " is not a valid (virtual) member of " .. className .. " \"" .. name .. "\"", 3)
     end
@@ -12361,16 +12345,16 @@ local function CreateRef(className, name, parent)
     RefMetatable.__metatable = false
 
     RefMetatable.__index = function(_, index)
-        if index == "ClassName" then -- First check "properties"
+        if index == "ClassName" then 
             return className
         elseif index == "Name" then
             return name
         elseif index == "Parent" then
             return parent
         elseif className == "StringValue" and index == "Value" then
-            -- Supporting StringValue.Value for Rojo .txt file conv
+            
             return StringValue_Value
-        else -- Lastly, check "methods"
+        else 
             local InstanceMethod = InstanceMethodProxies[index]
 
             if InstanceMethod then
@@ -12378,45 +12362,45 @@ local function CreateRef(className, name, parent)
             end
         end
 
-        -- Next we'll look thru child refs
+        
         for Child in next, Children do
             if Child.Name == index then
                 return Child
             end
         end
 
-        -- At this point, no member was found; this is the same err format as Roblox
+        
         InvalidMember(index)
     end
 
     RefMetatable.__newindex = function(_, index, value)
-        -- __newindex is only for props fyi
+        
         if index == "ClassName" then
             ReadOnlyProperty(index)
         elseif index == "Name" then
             name = value
         elseif index == "Parent" then
-            -- We'll just ignore the process if it's trying to set itself
+            
             if value == Ref then
                 return
             end
 
             if parent ~= nil then
-                -- Remove this ref from the CURRENT parent
+                
                 RefChildren[parent][Ref] = nil
             end
 
             parent = value
 
             if value ~= nil then
-                -- And NOW we're setting the new parent
+                
                 RefChildren[value][Ref] = true
             end
         elseif className == "StringValue" and index == "Value" then
-            -- Supporting StringValue.Value for Rojo .txt file conv
+            
             StringValue_Value = value
         else
-            -- Same err as __index when no member is found
+            
             InvalidMember(index)
         end
     end
@@ -12436,18 +12420,18 @@ local function CreateRef(className, name, parent)
     return Ref
 end
 
--- Create real ref DOM from object tree
+
 local function CreateRefFromObject(object, parent)
     local RefId = object[1]
     local ClassNameId = object[2]
-    local Properties = object[3] -- Optional
-    local Children = object[4] -- Optional
+    local Properties = object[3] 
+    local Children = object[4] 
 
     local ClassName = ClassNameIdBindings[ClassNameId]
 
     local Name = Properties and table_remove(Properties, 1) or ClassName
 
-    local Ref = CreateRef(ClassName, Name, parent) -- 3rd arg may be nil if this is from root
+    local Ref = CreateRef(ClassName, Name, parent) 
     RefBindings[RefId] = Ref
 
     if Properties then
@@ -12470,7 +12454,7 @@ for _, Object in next, ObjectTree do
     CreateRefFromObject(Object, RealObjectRoot)
 end
 
--- Now we'll set script closure refs and check if they should be ran as a BaseScript
+
 for RefId, Closure in next, ClosureBindings do
     local Ref = RefBindings[RefId]
 
@@ -12486,7 +12470,7 @@ end
 local function LoadScript(scriptRef)
     local ScriptClassName = scriptRef.ClassName
 
-    -- First we'll check for a cached module value (packed into a tbl)
+    
     local StoredModuleValue = StoredModuleValues[scriptRef]
     if StoredModuleValue and ScriptClassName == "ModuleScript" then
         return unpack(StoredModuleValue)
@@ -12499,7 +12483,7 @@ local function LoadScript(scriptRef)
 
         local VirtualFullName = scriptRef:GetFullName()
 
-        -- Check for vanilla/Roblox format
+        
         local OriginalErrorLine, BaseErrorMessage = string_match(originalErrorMessage, "[^:]+:(%d+): (.+)")
 
         if not OriginalErrorLine or not LineOffsets then
@@ -12519,7 +12503,7 @@ local function LoadScript(scriptRef)
         return VirtualFullName .. ":" .. RealErrorLine .. ": " .. BaseErrorMessage
     end
 
-    -- If it's a BaseScript, we'll just run it directly!
+    
     if ScriptClassName == "LocalScript" or ScriptClassName == "Script" then
         local RunSuccess, ErrorMessage = xpcall(Closure, function(msg)
             return msg
@@ -12543,8 +12527,8 @@ local function LoadScript(scriptRef)
     end
 end
 
--- We'll assign the actual func from the top of this output for flattening user globals at runtime
--- Returns (in a tuple order): wax, script, require
+
+
 function ImportGlobals(refId)
     local ScriptRef = RefBindings[refId]
 
@@ -12561,7 +12545,7 @@ function ImportGlobals(refId)
         return unpack(PCallReturn)
     end
 
-    -- `wax.shared` index
+    
     local WaxShared = table_freeze(setmetatable({}, {
         __index = SharedEnvironment,
         __newindex = function(_, index, value)
@@ -12576,13 +12560,13 @@ function ImportGlobals(refId)
     }))
 
     local Global_wax = table_freeze({
-        -- From AOT variable imports
+        
         version = WaxVersion,
         envname = EnvName,
 
         shared = WaxShared,
 
-        -- "Real" globals instead of the env set ones
+        
         script = script,
         require = require,
     })
@@ -12604,7 +12588,7 @@ function ImportGlobals(refId)
 
             return LoadScript(module)
         elseif ModuleArgType == "string" and string_sub(module, 1, 1) ~= "@" then
-            -- The control flow on this SUCKS
+            
 
             if #module == 0 then
                 error("Attempted to call require with empty string", 2)
@@ -12625,7 +12609,7 @@ function ImportGlobals(refId)
                     RealIndex = "Parent"
                 end
 
-                -- Don't advance dir if it's just another "/" either
+                
                 if RealIndex ~= "" then
                     local ResultRef = CurrentRefPointer:FindFirstChild(RealIndex)
                     if not ResultRef then
@@ -12642,7 +12626,7 @@ function ImportGlobals(refId)
                     end
                 end
 
-                -- For possible checks next cycle
+                
                 PreviousPathMatch = PathMatch
             end
 
@@ -12658,7 +12642,7 @@ function ImportGlobals(refId)
         return RealCall(require, module, ...)
     end
 
-    -- Now, return flattened globals ready for direct runtime exec
+    
     return Global_wax, Global_script, Global_require
 end
 
