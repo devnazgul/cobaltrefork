@@ -1,10 +1,28 @@
+--[[
+    Cobalt
+    A runtime developer tool to monitor and intercept network traffic
+    coming from the roblox game engine.
+    
+    This script is NOT intended to be modified.
+    To view the source code, see the 'Src' folder on the official GitHub repository!
+
+    Authors: deivid, upio
+    GitHub: https://github.com/notpoiu/cobalt/                                      
+--]]
+
+
+-- ++++++++ WAX BUNDLED DATA BELOW ++++++++ --
+
+-- Will be used later for getting flattened globals
 local ImportGlobals
 
+-- Holds direct closure data (defining this before the DOM tree for line debugging etc)
 local ClosureBindings = {
     function()local wax,script,require=ImportGlobals(1)local ImportGlobals return (function(...)wax.shared.CobaltStartTime = tick()
 
 local FileLogger = require(script.Utils.FileLog)
 
+-- Environment
 for _, Service in pairs({
 	"ContentProvider",
 	"CoreGui",
@@ -25,19 +43,24 @@ wax.shared.Settings = {}
 
 wax.shared.Hooks = {}
 
+-- Executor Support
 wax.shared.ExecutorName = identifyexecutor()
 wax.shared.ExecutorSupport = require(script.ExecutorSupport)
 
+-- Utils
 require(script.Utils.Connect)
 wax.shared.Hooking = require(script.Utils.Hooking)
 
+-- UI
 wax.shared.Sonner = require(script.Utils.UI.Sonner)
 
+-- Code Generation
 local LuaEncode = require(script.Utils.Serializer.LuaEncode)
 wax.shared.LuaEncode = LuaEncode
 
 local CodeGen = require(script.Utils.CodeGen.Generator)
 
+-- Variables
 if not wax.shared.Players.LocalPlayer then
 	wax.shared.Players.PlayerAdded:Wait()
 end
@@ -57,6 +80,7 @@ else
 	end))
 end
 
+-- Functions
 wax.shared.gethui = gethui or function()
 	return wax.shared.CoreGui
 end
@@ -104,8 +128,7 @@ wax.shared.newcclosure = wax.shared.ExecutorName == "AWP"
 				return __F(...)
 			end
 
-			setfenv(nf, x) 
-
+			setfenv(nf, x) -- set func env (env of nf gets deoptimized)
 			return newcclosure(nf, name)
 		end
 	or newcclosure
@@ -236,6 +259,7 @@ end
 
 local AnticheatData = require(script.Utils.Anticheats.Main)
 
+-- Load Script
 wax.shared.Communicator = Instance.new("BindableEvent")
 
 wax.shared.SetupLoggingConnection = function()
@@ -355,8 +379,7 @@ wax.shared.Connect(wax.shared.LocalPlayer.OnTeleport:Connect(function()
 		return
 	end
 
-	
-
+	-- getgenv().COBALT_LATEST_URL for dev environments
 	local CobaltURL = getgenv().COBALT_LATEST_URL
 		or "https://github.com/notpoiu/cobalt/releases/latest/download/Cobalt.luau"
 	wax.shared.queue_on_teleport(string.format(
@@ -380,7 +403,7 @@ if AnticheatData.Disabled then
 end
 
 end)() end,
-    function()local wax,script,require=ImportGlobals(2)local ImportGlobals return (function(...)
+    function()local wax,script,require=ImportGlobals(2)local ImportGlobals return (function(...)--[[
 
 	Very lightweight checks for various executor functions and reports whether they are working or not.
 	Some checks also verify that the function works as intended, not just that it exists.
@@ -396,8 +419,7 @@ local ExecutorSupport = {
 
 local BrokenFeatures = {
 	["Volcano"] = { "oth", "run_on_actor" },
-	["Potassium"] = { "oth" } 
-
+	["Potassium"] = { "oth" } -- submit a pr to luau
 }
 
 local function CheckFFlagValue(Name: string, Value: any)
@@ -450,13 +472,16 @@ local function test(name, Callback, CheckType, Essential)
 	end
 end
 
+-- FFlag Library
 test("getfflag", getfflag, true)
 test("setfflag", setfflag, true)
 
+-- Actor Library
 test("getactors", getactors, true)
 test("run_on_actor", run_on_actor, true)
 test("create_comm_channel", create_comm_channel, true)
 
+-- Closure Library
 test("newcclosure", function()
 	assert(typeof(newcclosure) == "function", "newcclosure is not a function")
 	local CClosure = newcclosure(function()
@@ -570,6 +595,7 @@ test("setstackhidden", function()
 	assert(IsHidden == true, "setstackhidden did not hide the function from the stack (error with level traceback)")
 end, false, false)
 
+-- Oth Library
 test("oth", function()
 	assert(oth ~= nil, "oth library not found")
 
@@ -669,6 +695,7 @@ test("oth", function()
 	))
 end, false, false)
 
+-- Metamethod
 test("hookmetamethod", function()
 	assert(typeof(hookmetamethod) == "function", "hookmetamethod is not a function")
 
@@ -722,6 +749,7 @@ test("getrawmetatable", function()
 	)
 end)
 
+-- Instance Library
 test("getcallbackvalue", function()
 	assert(typeof(getcallbackvalue) == "function", "getcallbackvalue is not a function")
 
@@ -807,7 +835,7 @@ test("cloneref", function()
 	assert(typeof(cloneref) == "function", "cloneref is not a function")
 
 	local ref = cloneref(game)
-	assert(not rawequal(ref, game), "cloneref did not create a ref to instance")
+	assert(ref ~= game, "cloneref did not create a ref to instance")
 	assert(typeof(ref) == "Instance", "cloneref did not return an instance")
 end)
 test("compareinstances", function()
@@ -879,8 +907,7 @@ end
 return ExecutorSupport
 
 end)() end,
-    [17] = function()local wax,script,require=ImportGlobals(17)local ImportGlobals return (function(...)
-
+    [17] = function()local wax,script,require=ImportGlobals(17)local ImportGlobals return (function(...)--[[
     Bypasses for popular roblox anticheats
 ]]
 
@@ -949,7 +976,12 @@ end
 return AnticheatData
 
 end)() end,
-    [34] = function()local wax,script,require=ImportGlobals(34)local ImportGlobals return (function(...)
+    [34] = function()local wax,script,require=ImportGlobals(34)local ImportGlobals return (function(...)-- LuaEncode - Fast table serialization library for pure Luau/Lua 5.1+
+-- MIT License | Copyright (c) 2022-2025 Chad Hyatt <chad@hyatt.page>
+-- https://github.com/chadhyatt/LuaEncode
+
+--!optimize 2
+--!native
 
 local table, string, next, pcall, game, workspace, tostring, tonumber, getmetatable =
     table, string, next, pcall, game, workspace, tostring, tonumber, getmetatable
@@ -986,6 +1018,8 @@ local function LookupTable(array, lookupType)
     return Out
 end
 
+-- Used for checking direct getfield syntax; Lua keywords can't be used as keys without being a str
+-- FYI; `continue` is Luau only (in Lua it's actually a global function)
 local LuaKeywords = LookupTable({
     "and", "break", "do", "else",
     "elseif", "end", "false", "for",
@@ -995,6 +1029,7 @@ local LuaKeywords = LookupTable({
     "while", "continue"
 })
 
+-- Used to properly serialize NaN values
 local NumberCorrection = {
 	[string_pack(">n", 0 / 0)] = "0/0",
 	[string_pack(">n", -(0 / 0))] = "-(0/0)",
@@ -1002,6 +1037,7 @@ local NumberCorrection = {
 	[string_pack(">n", tonumber("-nan"))] = 'tonumber("-nan")',
 }
 
+-- Type names that can be used as manual key indexes (i.e. non-reference types)
 local KeyIndexTypes = LookupTable({
     "number", "string", "boolean", "Enum",
     "EnumItem", "Enums"
@@ -1018,8 +1054,7 @@ local function CheckType(inputData, dataName, ...)
         error(string_format(
             "LuaEncode: Incorrect type for `%s`: `%s` expected, got `%s`",
             dataName,
-            table_concat(ValidTypes, ", "), 
-
+            table_concat(ValidTypes, ", "), -- For if multiple types are accepted
             InputType
         ), 0)
     end
@@ -1027,10 +1062,11 @@ local function CheckType(inputData, dataName, ...)
     return inputData
 end
 
+-- This re-serializes a string back into Lua, for the interpreter AND humans to read. This fixes
+-- `string_format("%q")` only outputting in system encoding, instead of explicit Lua byte escapes
 local SerializeString
 do
-    
-
+    -- These are control characters to be encoded in a certain way in Lua rather than just a byte escape
     local SpecialCharacters = {
         ["\""] = "\\\"",
         ["\\"] = "\\\\",
@@ -1052,14 +1088,13 @@ do
     end
 
     function SerializeString(inputString)
-        
-
-        
-
+        -- FYI; We can't do "\0-\31" in Lua 5.1 (Only Luau/Lua 5.2+) due to an embedded zeros in pattern
+        -- issue. See: https://stackoverflow.com/a/22962409
         return table_concat({ '"', string_gsub(inputString, "[%z\\\"\1-\31\127-\255]", SpecialCharacters), '"' })
     end
 end
 
+-- Escape warning messages and such for comment block inserts
 local function CommentBlock(inputString)
     local Longest = -1
     for Match in string_gmatch(inputString, "%](=*)%]") do
@@ -1072,9 +1107,10 @@ local function CommentBlock(inputString)
     return "--[" .. Padding .. "[" .. inputString .. "]" .. Padding .. "]"
 end
 
+--[[
 LuaEncode(inputTable: {[any]: any}, options: {[string]: any}): string
 
-    
+    ---------- OPTIONS: ----------
 
     Prettify <boolean:false> | Whether or not the output should be pretty printed
 
@@ -1193,21 +1229,16 @@ local function LuaEncode(inputTable, options)
         end
 
         TypeCases["number"] = function(value, isKey)
-			
-
-			
-
+			-- If the number isn't the current real index of the table, we DO want to
+			-- explicitly define it in the serialization no matter what for accuracy
 			if isKey and value == KeyNumIndex then
-				
-
+				-- ^^ What's EXPECTED unless otherwise explicitly defined, if so, return no encoded num
 				KeyNumIndex = KeyNumIndex + 1
 				return nil, true
 			end
 
-			
-
-			
-
+			-- Lua's internal `tostring` handling will denote positive/negativie-infinite number TValues as "inf", which
+			-- makes certain numbers not encode properly. We also just want to make the output precise
 			if value == 1 / 0 then
 				return PositiveInf
 			elseif value == -1 / 0 then
@@ -1216,10 +1247,8 @@ local function LuaEncode(inputTable, options)
 				return "math.pi"
 			end
 
-			
-
-			local NumberPacked = string_pack(">n", value) 
-
+			-- Provided by felixdm
+			local NumberPacked = string_pack(">n", value) -- gameguy is a boss
 			local CorrectedNumber = NumberCorrection[NumberPacked]
 			if CorrectedNumber then
 				return CorrectedNumber
@@ -1232,28 +1261,23 @@ local function LuaEncode(inputTable, options)
 				)
 			end
 
-			
-
+			-- Return fixed-formatted precision num
 			return string_format("%.14g", value)
 		end
 
         TypeCases["string"] = function(value, isKey)
             if isKey and not LuaKeywords[value] and string_match(value, DirectIndexPat) then
-                
-
+                -- Doesn't need full string def
                 return value, true
             end
 
             return SerializeString(value)
         end
 
-        
-
-        
-
+        -- This is NOT used for recursive table serialization, only table-as-key values and Roblox data types that use tables as
+        -- arguments for constructor functions
         TypeCases["table"] = function(value, isKey, stLarpAsRegTable)
-            
-
+            -- Primarily for tables-as-keys
             if VisitedTables[value] and OutputWarnings then
                 return "{--[[LuaEncode: Duplicate reference]]}"
             end
@@ -1290,8 +1314,7 @@ local function LuaEncode(inputTable, options)
 		end
 
         TypeCases["function"] = function(value)
-			
-
+			-- We can't serialize functions so we just return a comment block with function information
 			local FunctionName, ArgumentCount, VarArg, Line = debug.info(value, "nal")
 
 			local Arguments = {}
@@ -1303,15 +1326,13 @@ local function LuaEncode(inputTable, options)
 				[[function(%s)%s%s%s%s%sreturn%send]],
 				`{table_concat(Arguments, ", ")}{VarArg and `{Arguments[1] and ", " or ""}...` or ""}`,
 
-				`{CodegenNewline}{IndentString}{IndentStringBase}
+				`{CodegenNewline}{IndentString}{IndentStringBase}-- Name: {FunctionName == "" and "Anonymous Function" or FunctionName} | Line: {Line}`,
 
-				`{CodegenNewline}{IndentString}{IndentStringBase}
-
+				`{CodegenNewline}{IndentString}{IndentStringBase}-- {islclosure(value) and `Upvalues: {#debug.getupvalues(
 					value
 				)}` or "Upvalues: N/A (C Closure)"}`,
 
-				`{CodegenNewline}{IndentString}{IndentStringBase}
-
+				`{CodegenNewline}{IndentString}{IndentStringBase}-- `
 					.. (
 						getfunctionhash
 							and `{islclosure(value) and `Function Hash: {getfunctionhash(value)}` or "Function Hash: N/A (C Closure)"}`
@@ -1319,8 +1340,7 @@ local function LuaEncode(inputTable, options)
 					),
 
 				OutputWarnings
-						and `{CodegenNewline}{IndentString}{IndentStringBase}
-
+						and `{CodegenNewline}{IndentString}{IndentStringBase}-- LuaEncode: Unable to serialize function`
 					or "",
 
 				`{CodegenNewline}{IndentString}{IndentStringBase}`,
@@ -1328,7 +1348,7 @@ local function LuaEncode(inputTable, options)
 			)
 		end
 
-        
+        ---------- ROBLOX CUSTOM DATA TYPES BELOW ----------
 
         TypeCases["Axes"] = function(value)
             local EncodedArgs = {}
@@ -1348,10 +1368,8 @@ local function LuaEncode(inputTable, options)
         end
 
         TypeCases["BrickColor"] = function(value)
-            
-
-            
-
+            -- BrickColor.Number (Its enum ID) will be slightly more efficient in all cases in deser,
+            -- so we'll use it if Options.Prettify is false
             return "BrickColor.new(" ..
                 ((Prettify and TypeCase("string", value.Name)) or value.Number) ..
                 ")"
@@ -1366,14 +1384,10 @@ local function LuaEncode(inputTable, options)
                 SearchKeyword = value.SearchKeyword,
                 MinPrice = value.MinPrice,
                 MaxPrice = value.MaxPrice,
-                SortType = value.SortType,             
-
-                CategoryFilter = value.CategoryFilter, 
-
-                BundleTypes = value.BundleTypes,       
-
-                AssetTypes = value.AssetTypes          
-
+                SortType = value.SortType,             -- EnumItem
+                CategoryFilter = value.CategoryFilter, -- EnumItem
+                BundleTypes = value.BundleTypes,       -- table
+                AssetTypes = value.AssetTypes          -- table
             })
         end
 
@@ -1393,45 +1407,30 @@ local function LuaEncode(inputTable, options)
             return "DateTime.fromUnixTimestamp(" .. value.UnixTimestamp .. ")"
         end
 
-        
-
-        
-
+        -- Properties seem to throw an error on index if the scope isn't a Studio plugin, so we're
+        -- directly getting values! (so fun!!!!)
         TypeCases["DockWidgetPluginGuiInfo"] = function(value)
-            
-
+            -- e.g.: "InitialDockState:Right InitialEnabled:0 InitialEnabledShouldOverrideRestore:0 FloatingXSize:0 FloatingYSize:0 MinWidth:0 MinHeight:0"
             local ValueString = tostring(value)
 
             return "DockWidgetPluginGuiInfo.new(" ..
                 Args(
-                
-
-                    Enum.InitialDockState[string_match(ValueString, "InitialDockState:(%w+)")],    
-
-                    
-
-                    string_match(ValueString, "InitialEnabled:(%w+)") == "1",                      
-
-                    string_match(ValueString, "InitialEnabledShouldOverrideRestore:(%w+)") == "1", 
-
-                    
-
-                    tonumber(string_match(ValueString, "FloatingXSize:(%w+)")),                    
-
-                    tonumber(string_match(ValueString, "FloatingYSize:(%w+)")),                    
-
-                    
-
-                    tonumber(string_match(ValueString, "MinWidth:(%w+)")),                         
-
-                    tonumber(string_match(ValueString, "MinHeight:(%w+)"))                         
-
+                -- InitialDockState (Enum.InitialDockState)
+                    Enum.InitialDockState[string_match(ValueString, "InitialDockState:(%w+)")],    -- Enum.InitialDockState.Right
+                    -- InitialEnabled and InitialEnabledShouldOverrideRestore (boolean as number; `0` or `1`)
+                    string_match(ValueString, "InitialEnabled:(%w+)") == "1",                      -- false
+                    string_match(ValueString, "InitialEnabledShouldOverrideRestore:(%w+)") == "1", -- false
+                    -- FloatingXSize/FloatingYSize (numbers)
+                    tonumber(string_match(ValueString, "FloatingXSize:(%w+)")),                    -- 0
+                    tonumber(string_match(ValueString, "FloatingYSize:(%w+)")),                    -- 0
+                    -- MinWidth/MinHeight (numbers)
+                    tonumber(string_match(ValueString, "MinWidth:(%w+)")),                         -- 0
+                    tonumber(string_match(ValueString, "MinHeight:(%w+)"))                         -- 0
                 ) ..
                 ")"
         end
 
-        
-
+        -- e.g. `Enum.UserInputType`
         TypeCases["Enum"] = function(value)
             local ValueString = tostring(value)
 
@@ -1441,8 +1440,7 @@ local function LuaEncode(inputTable, options)
             return "Enum[" .. SerializeString(ValueString) .. "]"
         end
 
-        
-
+        -- e.g. `Enum.UserInputType.Gyro`
         TypeCases["EnumItem"] = function(value)
             local EnumTypeStr = TypeCase("Enum", value.EnumType)
             local EnumName = value.Name
@@ -1453,8 +1451,7 @@ local function LuaEncode(inputTable, options)
             return EnumTypeStr .. "[" .. SerializeString(EnumName) .. "]"
         end
 
-        
-
+        -- i.e. the `Enum` global return
         TypeCases["Enums"] = function(value)
             return "Enum"
         end
@@ -1462,8 +1459,7 @@ local function LuaEncode(inputTable, options)
         TypeCases["Faces"] = function(value)
             local EncodedArgs = {}
             local EnumValues = {
-                ["Enum.NormalId.Top"] = value.Top, 
-
+                ["Enum.NormalId.Top"] = value.Top, -- These return bools
                 ["Enum.NormalId.Bottom"] = value.Bottom,
                 ["Enum.NormalId.Left"] = value.Left,
                 ["Enum.NormalId.Right"] = value.Right,
@@ -1488,10 +1484,8 @@ local function LuaEncode(inputTable, options)
             return "Font.new(" .. Args(value.Family, value.Weight, value.Style) .. ")"
         end
 
-        
-
-        
-
+        -- Instance refs can be evaluated to their paths (optional), but if parented to
+        -- nil or some DataModel not under `game`, it'll just return nil
         TypeCases["Instance"] = function(value)
 			if UseInstancePaths then
 				local InstancePath, NilFunctionInserted = GetFullPath(value, {
@@ -1507,8 +1501,7 @@ local function LuaEncode(inputTable, options)
 					return InstancePath
 				end
 
-				
-
+				-- ^^ Now, if the path isn't accessable, falls back to the return below anyway
 			end
 
 			return "nil"
@@ -1580,18 +1573,15 @@ local function LuaEncode(inputTable, options)
             return "Rect.new(" .. Args(value.Min, value.Max) .. ")"
         end
 
-        
-
+        -- Roblox doesn't provide direct read properties for min/max on `Region3`, but they do on Region3int16..
         TypeCases["Region3"] = function(value)
             local ValuePos = value.CFrame.Position
             local ValueSize = 0.5 * value.Size
 
             return "Region3.new(" ..
                 Args(
-                    ValuePos - ValueSize, 
-
-                    ValuePos + ValueSize  
-
+                    ValuePos - ValueSize, -- Minimum
+                    ValuePos + ValueSize  -- Maximum
                 ) ..
                 ")"
         end
@@ -1654,16 +1644,13 @@ local function LuaEncode(inputTable, options)
 
         TypeCases["SharedTable"] = function(value, isKey)
             local StClone = {}
-            
-
-            
-
+            -- Will still compile in vanilla Lua if we do it this way. We should probably create a deep clone
+            -- of the current state of the table regardless
             for Key, Value in SharedTable.clone(value, not SharedTableLarpAsRegTable) do
                 StClone[Key] = Value
             end
 
-            local StCloneStr = TypeCases["table"](StClone, isKey, true) 
-
+            local StCloneStr = TypeCases["table"](StClone, isKey, true) -- 3rd arg is stLarpAsRegTable
             if SharedTableLarpAsRegTable then
                 return StCloneStr
             end
@@ -1671,52 +1658,42 @@ local function LuaEncode(inputTable, options)
         end
 
         TypeCases["userdata"] = function(value)
-            if getmetatable(value) ~= nil then 
-
+            if getmetatable(value) ~= nil then -- Has mt
                 return "newproxy(true)"
             else
-                return "newproxy()" 
-
+                return "newproxy()" -- newproxy() defaults to false (no mt)
             end
         end
     end
 
-    
-
+    -- Setup for final output, which will be concat together
     local Output = {}
 
     local TablePointer = inputTable
-    local NextKey = nil     
+    local NextKey = nil     -- Used with TableStack so the TablePointer loop knows where to continue from upon stack pop
+    local IsNewTable = true -- Used with table stack push/pop to identify when an opening curly brace should be added
 
-    local IsNewTable = true 
-
-    
-
-    local TableStack = {}                   
-
-    local RefMaps = { [TablePointer] = "" } 
-
-    local CycleMaps = {}                    
+    -- Stack array for table depth
+    local TableStack = {}                   -- [Depth: number] = {TablePointer: table, NextKey: any, KeyNumIndex: number}
+    local RefMaps = { [TablePointer] = "" } -- [Ref: table] = ".example["ref path"]'
+    local CycleMaps = {}                    -- ['.example["ref path"]'] = '.another["ref path"]'
 
     if IsArray then
         NextKey = 1
     end
 
     while TablePointer do
-        
-
+        -- Update StackLevel for formatting
         StackLevel = StackLevelOpt + #TableStack
         IndentString = (Prettify and string_rep(IndentStringBase, StackLevel)) or IndentStringBase
         EndingIndentString = (#IndentString > 0 and string_sub(IndentString, 1, -IndentCount - 1)) or ""
         
         local HasNextValue = (IsArray and NextKey < TablePointer["n"]) or (not IsArray and next(TablePointer, NextKey) ~= nil)
         
-        
-
+        -- Only append an opening brace to the table if this isn't just a continution up the stack
         if IsNewTable then
             Output[#Output + 1] = "{"
-        elseif not HasNextValue then 
-
+        elseif not HasNextValue then -- Formatting for the next entry still needs to be added like any other value
             Output[#Output + 1] = NewEntryString .. EndingIndentString
         else
             Output[#Output + 1] = ","
@@ -1724,8 +1701,7 @@ local function LuaEncode(inputTable, options)
 
         VisitedTables[TablePointer] = true
 
-        
-
+        -- Just because of control flow restrictions with Lua compatibility
         local SkipStackPop = false
 
         local function WalkTable(Key, Value)
@@ -1736,27 +1712,22 @@ local function LuaEncode(inputTable, options)
             Output[#Output + 1] = NewEntryString .. IndentString
 
             if KeyTypeCase and ValueTypeCase then
-                local ValueWasEncoded = false 
+                local ValueWasEncoded = false -- Keeping track of this for adding a "," to the output if needed
 
-                
-
+                -- Evaluate output for key
                 local KeyEncodedSuccess, EncodedKeyOrError, DontEncloseKeyInBrackets = pcall(KeyTypeCase, Key,
-                    true) 
+                    true) -- The `true` represents if it's a key or not, here it is
 
-                
-
+                -- Evaluate output for value, ignoring 2nd arg (`DontEncloseInBrackets`) because this isn't the key
                 local ValueEncodedSuccess, EncodedValueOrError
                 if not ValueIsTable then
                     ValueEncodedSuccess, EncodedValueOrError = pcall(ValueTypeCase, Value, false)
                 end
 
-                
-
-                
-
+                -- Ignoring `if EncodedKeyOrError` because the key doesn't actually need to ALWAYS
+                -- be explicitly encoded, like if it's a number of the current key index!
                 if KeyEncodedSuccess and (ValueIsTable or (ValueEncodedSuccess and EncodedValueOrError)) then
-                    
-
+                    -- Append explicit key if necessary
                     if EncodedKeyOrError then
                         if DontEncloseKeyInBrackets then
                             Output[#Output + 1] = EncodedKeyOrError
@@ -1767,8 +1738,7 @@ local function LuaEncode(inputTable, options)
                         Output[#Output + 1] = EqualsSeperator
                     end
 
-                    
-
+                    -- Of course, recursive tables are handled differently and use the stack system
                     if ValueIsTable then
                         local IndexPath
                         if InsertCycles and KeyIndexTypes[KeyType] and RefMaps[TablePointer] then
@@ -1790,13 +1760,12 @@ local function LuaEncode(inputTable, options)
                             TablePointer = Value
                             NextKey = nil
                             KeyNumIndex = 1
-                            IsArray = false 
+                            IsArray = false -- Nested tables are not treated as arrays with 'n' field
 
                             IsNewTable = true
                             SkipStackPop = true
 
-                            return false 
-
+                            return false -- break
                         else
                             EncodedValueOrError = string_format(
                                 "{%s}",
@@ -1809,17 +1778,13 @@ local function LuaEncode(inputTable, options)
                         end
                     end
 
-                    
-
+                    -- Append value like normal
                     Output[#Output + 1] = EncodedValueOrError
 
                     ValueWasEncoded = true
-                elseif OutputWarnings then 
-
-                    
-
-                    
-
+                elseif OutputWarnings then -- Then `Encoded(Key/Value)OrError` is the error msg
+                    -- ^^ Then either the key or value wasn't properly checked or encoded, and there
+                    -- was an error we need to log!
                     local ErrorMessage = string_format(
                         "LuaEncode: Failed to serialize %s of data type %s: %s",
                         (not KeyEncodedSuccess and "key") or (not ValueEncodedSuccess and "value") or "key/value",
@@ -1834,17 +1799,15 @@ local function LuaEncode(inputTable, options)
 
                 local HasNextValue = (IsArray and Key < TablePointer["n"]) or (not IsArray and next(TablePointer, Key) ~= nil)
                 if not HasNextValue then
-                    
-
+                    -- If there isn't another value after the current index, add ending formatting
                     Output[#Output + 1] = NewEntryString .. EndingIndentString
                 elseif ValueWasEncoded then
                     Output[#Output + 1] = ","
                 end
             else
-                
+                -- Data type is unimplemented
 
-                
-
+                -- Dtc
                 local KeyTostring = (KeyType == "userdata" and "userdata") or
                     tostring(Key)
                 local ValueTostring = (ValueType == "userdata" and "userdata") or
@@ -1866,8 +1829,7 @@ local function LuaEncode(inputTable, options)
         end
 
         if IsArray then
-            
-
+            -- When returning from a nested table, continue from NextKey + 1 instead of 1
             local StartIndex = IsNewTable and 1 or (NextKey + 1)
             for Index = StartIndex, TablePointer["n"] do
                 local Success = WalkTable(Index, rawget(TablePointer, Index))
@@ -1884,8 +1846,7 @@ local function LuaEncode(inputTable, options)
             end
         end
 
-        
-
+        -- Vanilla Lua control flow is fun
         if not SkipStackPop then
             if not Prettify and IndentCount > 0 then
                 Output[#Output + 1] = IndentString
@@ -1894,7 +1855,7 @@ local function LuaEncode(inputTable, options)
 
             if #TableStack > 0 then
                 local TableUp = TableStack[#TableStack]
-                TableStack[#TableStack] = nil 
+                TableStack[#TableStack] = nil -- Pop off the table stack
 
                 TablePointer, NextKey, KeyNumIndex, IsArray = TableUp[1], TableUp[2], TableUp[3], TableUp[4]
                 IsNewTable = false
@@ -2020,6 +1981,7 @@ local GetEventReferenceCode = [[local function GetEventReference(options)
 	return Value
 end]]
 
+--// Pasted from Dex (maximum detection)
 for i = 0, 31 do
 	CodeGen.CleanTable[string.char(i)] = "\\" .. string.format("%03d", i)
 end
@@ -2395,8 +2357,7 @@ function CodeGen:BuildHookCode(CallInfo: CallInfo)
 
 	if Type == "Incoming" then
 		if DoesUseCallbackValue(CallInfo.Instance) then
-			
-
+			-- Callback/Invoke returned value
 			if CallInfo.OriginalInvokeArgs then
 				if CallInfo.IsCallbackReturn then
 					return CodeGenHeader
@@ -2486,8 +2447,7 @@ end)]],
 					)
 			end
 
-			
-
+			-- Callback value
 			return CodeGenHeader
 				.. WrapCodeInActor(
 					string.format(
@@ -2598,14 +2558,12 @@ function CreateArgsString(SerializedArgs: string, Args: { [number]: any, n: numb
 		return ""
 	end
 
-	
-
+	--// Cyclic Table Handler \\--
 	if string.sub(SerializedArgs, 1, 9) == "(function" then
 		return `{Prefix == nil and "" or Prefix}table.unpack({SerializedArgs}, 1, {Args.n})`
 	end
 
-	
-
+	--// Normal Table Handler \\--
 	return `{Prefix == nil and "" or Prefix}{string.sub(SerializedArgs, 2, #SerializedArgs - 1)}`
 end
 
@@ -2858,8 +2816,7 @@ end)() end,
 	Dragging = false,
 	Frame = nil,
 	FramePosition = nil,
-	FrameSize = nil, 
-
+	FrameSize = nil, -- Added to store initial frame size
 	StartPosition = nil,
 	ChangedConnection = nil,
 	Callback = nil,
@@ -2927,6 +2884,7 @@ end)() end,
     [28] = function()local wax,script,require=ImportGlobals(28)local ImportGlobals return (function(...)local Log = {}
 Log.__index = Log
 
+--// Auto Ignore Constants \\--
 local SpamCallCountThreshold = 15
 local SpamTimeWindowSeconds = 1
 
@@ -3017,8 +2975,7 @@ local function RunInterceptors(Interceptors: { (...any) -> (...any) }, Info: any
 end
 
 function Log:Call(RawInfo)
-	
-
+	--// Instance Path Caching \\--
 	if
 		wax.shared.SaveManager:GetState("CacheInstancePaths", false)
 		and self.Instance.IsDescendantOf(self.Instance, game)
@@ -3026,33 +2983,28 @@ function Log:Call(RawInfo)
 		RawInfo.Path = self.Instance.GetFullName(self.Instance)
 	end
 
-	
-
+	--// Ratelimiting \\--
 	local Success, Data = pcall(function()
 		return self:IsOverSpamThreshold()
 	end)
 
 	if Success and Data then return end
 
-	
-
+	--// Info stuff \\--
 	local Info = DeepClone(RawInfo)
 	Info.CreationTime = tick()
 
-	
-
+	--// Plugin Interceptors \\--
 	local PluginManager = wax.shared.CobaltPluginManager
 	if PluginManager and PluginManager.HasInterceptors then
-		
-
+		-- Run Instance-specific interceptors (both exact type and "All")
 		local InstanceIntercept = PluginManager.Registry.Interceptors.Instance[self.Instance]
 		if InstanceIntercept then
 			if InstanceIntercept[self.Type] and RunInterceptors(InstanceIntercept[self.Type], Info, self) then return end
 			if InstanceIntercept["All"] and RunInterceptors(InstanceIntercept["All"], Info, self) then return end
 		end
 
-		
-
+		-- Run Global interceptors (both exact type and "All")
 		local GlobalByType = PluginManager.Registry.Interceptors.Global[self.Type]
 		if GlobalByType and RunInterceptors(GlobalByType, Info, self) then return end
 
@@ -3060,8 +3012,7 @@ function Log:Call(RawInfo)
 		if GlobalAll and RunInterceptors(GlobalAll, Info, self) then return end
 	end
 	
-	
-
+	--// Update Log \\--
 	local Index = #self.Calls + 1
 	self.Calls[Index] = Info
 	if not Info.IsExecutor then
@@ -3365,8 +3316,7 @@ function Adonis.Bypass()
 
 	for _, Adonis in AdonisTables do
 		for _, DetectionFunc in Adonis do
-			
-
+			-- Just in case they already loaded a custom anticheat bypass for adonis
 			if typeof(DetectionFunc) ~= "function" or isfunctionhooked(DetectionFunc) then
 				continue
 			end
@@ -3718,12 +3668,16 @@ local CodeGen = require(script.Parent.Parent.Utils.CodeGen.Generator)
 
 local Hooks = script.Parent.Hooks
 
+-- Main Thread Hooks
 for _, Hook in Hooks.Default:GetChildren() do
 	task.spawn(require, Hook)
 end
 
 getgenv().CobaltInitialized = true
 
+-- Actors use a different lua vm
+-- This means that our main thread metatable hooks dont apply in the actor's vm
+-- So we need to set up the hooks again in the actor lua vm in order to log everything
 local ActorsUtils = script.Parent.Actors
 
 wax.shared.ActorsEnabled = (
@@ -3760,8 +3714,7 @@ if wax.shared.ActorsEnabled then
 
 	ActorEnvironmentCode = ActorEnvironmentCode:gsub("COBALT_ACTOR_DATA", ActorData)
 
-	
-
+	-- Actor Logs Sync Layer
 	local function ReconstructTable(Info, CyclicRefs)
 		local Reconstructed = {}
 
@@ -3776,8 +3729,7 @@ if wax.shared.ActorsEnabled then
 					continue
 				end
 
-				
-
+				-- Check for Cobalt Created Object
 				if not Value["__CyclicRef"] then
 					Reconstructed[Key] = ReconstructTable(Value, CyclicRefs)
 					continue
@@ -3841,8 +3793,7 @@ if wax.shared.ActorsEnabled then
 			local ReconstructedInfo = ReconstructTable(RawInfo, CyclicRefs)
 			ReconstructedInfo.Blocked = true
 
-			
-
+			--// Reconstruct Packed Arguments (BindableEvents omit ["n"] for unknown reason) \\--
 			ReconstructedInfo.Arguments = ReconstructPacked(ReconstructedInfo.Arguments)
 			ReconstructedInfo.OriginalInvokeArgs = ReconstructPacked(ReconstructedInfo.OriginalInvokeArgs)
 
@@ -3851,8 +3802,7 @@ if wax.shared.ActorsEnabled then
 		elseif not Log.Ignored then
 			local ReconstructedInfo = ReconstructTable(RawInfo, CyclicRefs)
 
-			
-
+			--// Reconstruct Packed Arguments (BindableEvents omit ["n"] for unknown reason) \\--
 			ReconstructedInfo.Arguments = ReconstructPacked(ReconstructedInfo.Arguments)
 			ReconstructedInfo.OriginalInvokeArgs = ReconstructPacked(ReconstructedInfo.OriginalInvokeArgs)
 
@@ -3861,8 +3811,7 @@ if wax.shared.ActorsEnabled then
 		end
 	end))
 
-	
-
+	-- Actor Hooking Code Generation
 	local CodeToRun = ActorEnvironmentCode
 
 	for _, ActorHook in Hooks.Actors:GetChildren() :: { StringValue } do
@@ -3879,14 +3828,11 @@ if wax.shared.ActorsEnabled then
 		"end)",
 	}, "\n")
 
-	
+	-- Actual Hooking Logic
+	-- The hooking code wont run again if cobalt is already initialized in that Actor (to address deleted actors aka LuaStateProxy stuff)
 
-	
-
-	
-
-	
-
+	-- `HookActor` is to address Volcano returning non initialized actors inside their `getactors` function.
+	-- God this code is so ass 🥹
 	local function HookActor(TargetActor: Actor)
 		local Hooked = false
 		local Attempts = 0
@@ -3954,6 +3900,7 @@ local function CreateLookupTable(table)
 	return LookupTable
 end
 
+
 local function GetLog(Instance: InstancesToHook, Method: MethodsToHook, Function: (...any) -> ...any)
 	if wax.shared.ShouldIgnore(Instance, getcallingscript()) or LogConnectionFunctions[Function] then
 		return nil
@@ -3967,6 +3914,7 @@ local function GetLog(Instance: InstancesToHook, Method: MethodsToHook, Function
 	return Log
 end
 
+--[[
 	Individually logs an incoming remote call.
 
 	@param Instance The instance that was called.
@@ -4009,6 +3957,7 @@ local function LogRemote(
 	return false, Log
 end
 
+--[[
 	Creates a function that can be used to pass to `Connect` which will log all the incoming calls. It will additonally add the function to a ignore list (`LogConnectionFunctions`) to prevent unneccessary logging.
 	
 	@param Instance The instance to log.
@@ -4033,9 +3982,8 @@ local function CreateConnectionFunction(Instance: InstancesToHook, Method: Metho
 			end
 
 			if not Origin and Function then
-				
-
-				
+				-- ts is unreliable because people could js set the script global to nil
+				-- if only debug.getinfo(Function).source or debug.info(Function, "s") returned an Instance...
 
 				local Script = rawget(getfenv(Function), "script")
 				if typeof(Script) == "Instance" then
@@ -4071,6 +4019,7 @@ local function CreateConnectionFunction(Instance: InstancesToHook, Method: Metho
 	return ConnectionFunction
 end
 
+--[[
 	Creates a function that can be used to pass to callbacks (.OnInvoke & .OnClientInvoke) which will log all the incoming calls.
 	
 	@param Instance The instance to log.
@@ -4082,14 +4031,12 @@ local function CreateCallbackDetour(Instance: InstancesToHook, Method: MethodsTo
 	local Detour = function(...)
 		local Origin = nil
 
-		
-
+		-- May not exist in all executors
 		if getscriptfromthread then
 			Origin = getscriptfromthread(coroutine.running())
 		end
 
-		
-
+		-- Unreliable method to get script.
 		if not Origin then
 			local Script = rawget(getfenv(Callback), "script")
 			if typeof(Script) == "Instance" then
@@ -4147,6 +4094,7 @@ local function CreateCallbackDetour(Instance: InstancesToHook, Method: MethodsTo
 	return Detour
 end
 
+--[[
 	Handles setting up logging for the appropriate instances.
 
 	@param Instance The instance to handle.
@@ -4393,7 +4341,7 @@ end
 return AssetManager
 
 end)() end,
-    [29] = function()local wax,script,require=ImportGlobals(29)local ImportGlobals return (function(...)
+    [29] = function()local wax,script,require=ImportGlobals(29)local ImportGlobals return (function(...)--[[
 
 Pagination Module
 made by deivid and turned into module by upio
@@ -4503,12 +4451,10 @@ function Pagination:GetVisualInfo(Page: number?)
 		end
 		Result[ItemCount + 1] = "ellipsis"
 		Result[ItemCount + 2] = TotalPages
-		
-
+		--return MergeTables(LeftRange, "ellipsis", TotalPages)
 		return Result
 	elseif FakeLeft and not FakeRight then
-		
-
+		--local RightRange = CreateArray(TotalPages - ItemCount + 1, TotalPages)
 		Result[1] = 1
 		Result[2] = "ellipsis"
 
@@ -4520,8 +4466,7 @@ function Pagination:GetVisualInfo(Page: number?)
 
 		return Result
 	elseif FakeLeft and FakeRight then
-		
-
+		--local MiddleRange = CreateArray(LeftSibling, RightSibling)
 		Result[1] = 1
 		Result[2] = "ellipsis"
 		local Index = 3
@@ -4535,12 +4480,10 @@ function Pagination:GetVisualInfo(Page: number?)
 		Result[Index + 1] = TotalPages
 
 		return Result
-		
-
+		--return MergeTables(1, "ellipsis", MiddleRange, "ellipsis", TotalPages)
 	end
 
-	
-
+	--return CreateArray(1, TotalPages)
 	for i = 1, TotalPages do
 		Result[i] = i
 	end
@@ -4694,7 +4637,7 @@ end
 return Interface
 
 end)() end,
-    [41] = function()local wax,script,require=ImportGlobals(41)local ImportGlobals return (function(...)
+    [41] = function()local wax,script,require=ImportGlobals(41)local ImportGlobals return (function(...)--[[
 
 Luau syntax highlighter with studio colors
 Based on: https://devforum.roblox.com/t/realtime-richtext-lua-syntax-highlighting/2500399
@@ -5047,26 +4990,22 @@ function Resize.new(Options: {
 			end
 			return finalNewSize, finalNewPosition
 		else
-			
-
+			-- Non-mirrored logic
 			local currentScreenGuiAbsSize = self.ScreenGui.AbsoluteSize
-			local parentAbsSizeForMinMax = currentScreenGuiAbsSize 
+			local parentAbsSizeForMinMax = currentScreenGuiAbsSize -- As per original non-mirrored logic for min/max context
 
-			
-
+			-- These will store the final UDim offset values for position and the absolute pixel values for size calculation
 			local finalPosOffsetX = initialFramePosition.X.Offset
 			local finalPosOffsetY = initialFramePosition.Y.Offset
 
-			
-
+			-- Initial absolute pixel size of the frame
 			local initialAbsWidthPx = initialFrameSize.X.Scale * self.Parent.AbsoluteSize.X + initialFrameSize.X.Offset
 			local initialAbsHeightPx = initialFrameSize.Y.Scale * self.Parent.AbsoluteSize.Y + initialFrameSize.Y.Offset
 
 			local newAbsWidthPx = initialAbsWidthPx
 			local newAbsHeightPx = initialAbsHeightPx
 
-			
-
+			-- Min/max pixel dimensions
 			local minWidthPx = MinimumSize.X.Scale * parentAbsSizeForMinMax.X + MinimumSize.X.Offset
 			local minHeightPx = MinimumSize.Y.Scale * parentAbsSizeForMinMax.Y + MinimumSize.Y.Offset
 			local maxWidthPx = MaximumSize and (MaximumSize.X.Scale * parentAbsSizeForMinMax.X + MaximumSize.X.Offset)
@@ -5074,19 +5013,16 @@ function Resize.new(Options: {
 			local maxHeightPx = MaximumSize and (MaximumSize.Y.Scale * parentAbsSizeForMinMax.Y + MaximumSize.Y.Offset)
 				or math.huge
 
-			
-
+			-- Original edge calculation logic (assuming MainFrame.Position is center if AnchorPoint is 0.5,0.5 for these calcs)
 			local initialAbsCenterX = currentScreenGuiAbsSize.X * initialFramePosition.X.Scale
 				+ initialFramePosition.X.Offset
-			local initialAbsSizeX_forEdgeCalc = initialFrameSize.X.Offset 
-
+			local initialAbsSizeX_forEdgeCalc = initialFrameSize.X.Offset -- Original code used offset for this part of edge calculation
 			local initialRightEdgeX = initialAbsCenterX + initialAbsSizeX_forEdgeCalc / 2
 			local initialLeftEdgeX = initialAbsCenterX - initialAbsSizeX_forEdgeCalc / 2
 
 			local initialAbsCenterY = currentScreenGuiAbsSize.Y * initialFramePosition.Y.Scale
 				+ initialFramePosition.Y.Offset
-			local initialAbsSizeY_forEdgeCalc = initialFrameSize.Y.Offset 
-
+			local initialAbsSizeY_forEdgeCalc = initialFrameSize.Y.Offset -- Original code used offset for this part of edge calculation
 			local initialBottomEdgeY = initialAbsCenterY + initialAbsSizeY_forEdgeCalc / 2
 			local initialTopEdgeY = initialAbsCenterY - initialAbsSizeY_forEdgeCalc / 2
 
@@ -5094,21 +5030,18 @@ function Resize.new(Options: {
 				if resizeTypeX == "Left" then
 					local newLeftEdge = initialLeftEdgeX + mouseDelta.X
 					newAbsWidthPx = math.clamp(initialRightEdgeX - newLeftEdge, minWidthPx, maxWidthPx)
-					if newAbsWidthPx ~= (initialRightEdgeX - newLeftEdge) then 
-
+					if newAbsWidthPx ~= (initialRightEdgeX - newLeftEdge) then -- Readjust edge if clamped
 						newLeftEdge = initialRightEdgeX - newAbsWidthPx
 					end
 					if not LockedPosition then
-						local newAbsCenterX = newLeftEdge + newAbsWidthPx / 2 
-
+						local newAbsCenterX = newLeftEdge + newAbsWidthPx / 2 -- Assuming center is halfway for position update
 						finalPosOffsetX = newAbsCenterX - currentScreenGuiAbsSize.X * initialFramePosition.X.Scale
 					end
 				elseif resizeTypeX == "Right" then
 					local newRightEdge = initialRightEdgeX + mouseDelta.X
 					newAbsWidthPx = math.clamp(newRightEdge - initialLeftEdgeX, minWidthPx, maxWidthPx)
 					if not LockedPosition then
-						local newAbsCenterX = initialLeftEdgeX + newAbsWidthPx / 2 
-
+						local newAbsCenterX = initialLeftEdgeX + newAbsWidthPx / 2 -- Assuming center is halfway
 						finalPosOffsetX = newAbsCenterX - currentScreenGuiAbsSize.X * initialFramePosition.X.Scale
 					end
 				end
@@ -5118,39 +5051,33 @@ function Resize.new(Options: {
 				if resizeTypeY == "Top" then
 					local newTopEdge = initialTopEdgeY + mouseDelta.Y
 					newAbsHeightPx = math.clamp(initialBottomEdgeY - newTopEdge, minHeightPx, maxHeightPx)
-					if newAbsHeightPx ~= (initialBottomEdgeY - newTopEdge) then 
-
+					if newAbsHeightPx ~= (initialBottomEdgeY - newTopEdge) then -- Readjust edge if clamped
 						newTopEdge = initialBottomEdgeY - newAbsHeightPx
 					end
 					if not LockedPosition then
-						local newAbsCenterY = newTopEdge + newAbsHeightPx / 2 
-
+						local newAbsCenterY = newTopEdge + newAbsHeightPx / 2 -- Assuming center is halfway
 						finalPosOffsetY = newAbsCenterY - currentScreenGuiAbsSize.Y * initialFramePosition.Y.Scale
 					end
 				elseif resizeTypeY == "Bottom" then
 					local newBottomEdge = initialBottomEdgeY + mouseDelta.Y
 					newAbsHeightPx = math.clamp(newBottomEdge - initialTopEdgeY, minHeightPx, maxHeightPx)
 					if not LockedPosition then
-						local newAbsCenterY = initialTopEdgeY + newAbsHeightPx / 2 
-
+						local newAbsCenterY = initialTopEdgeY + newAbsHeightPx / 2 -- Assuming center is halfway
 						finalPosOffsetY = newAbsCenterY - currentScreenGuiAbsSize.Y * initialFramePosition.Y.Scale
 					end
 				end
 			end
 
-			
-
+			-- Convert final absolute pixel dimensions back to UDim offsets for size
 			local finalSizeOffsetX = newAbsWidthPx - (initialFrameSize.X.Scale * self.Parent.AbsoluteSize.X)
 			local finalSizeOffsetY = newAbsHeightPx - (initialFrameSize.Y.Scale * self.Parent.AbsoluteSize.Y)
 
 			local finalNewSize =
 				UDim2.new(initialFrameSize.X.Scale, finalSizeOffsetX, initialFrameSize.Y.Scale, finalSizeOffsetY)
-			local finalNewPosition = initialFramePosition 
-
+			local finalNewPosition = initialFramePosition -- Default if LockedPosition is true
 			if typeof(LockedPosition) == "UDim2" then
 				finalNewPosition = LockedPosition
-			elseif not LockedPosition then 
-
+			elseif not LockedPosition then -- Only update if not locked (boolean false)
 				finalNewPosition = UDim2.new(
 					initialFramePosition.X.Scale,
 					finalPosOffsetX,
@@ -5296,7 +5223,7 @@ end
 return SaveManager
 
 end)() end,
-    [45] = function()local wax,script,require=ImportGlobals(45)local ImportGlobals return (function(...)
+    [45] = function()local wax,script,require=ImportGlobals(45)local ImportGlobals return (function(...)--[[[
 
 Sonner Luau Port by upio
 Original Sonner by Emil Kowalski (https://sonner.emilkowal.ski/)
@@ -5423,8 +5350,7 @@ local function InternalToast(image, text, internalTime, removeCallback)
 
 		object.ZIndex = 500 - (#Sonner.Queue - index)
 
-		
-
+		-- shift them down
 		wax.shared.TweenService
 			:Create(object.UIScale, Sonner.TweenInfo, {
 				Scale = object.UIScale.Scale * ScaleMultiplier,
@@ -5552,9 +5478,8 @@ function Sonner.promise(func, options)
 		task.spawn(function()
 			setthreadidentity(8)
 
-			
-
-			
+			-- The thread identity is 8 when setting it on the parent thread (Sonner.promise), but it still lacks capabilities when running another child thread
+			-- Capabilities here should pass from a thread to another... Could be an upstream (executor) issue ?
 
 			Animations.FadeOut(notif.ImageLabel, 0.15)
 			wax.shared.TweenService
@@ -5703,6 +5628,7 @@ local NamecallMethods = CreateLookupTable({
 })
 local AllowedClassNames = CreateLookupTable({ "RemoteEvent", "RemoteFunction", "UnreliableRemoteEvent", "BindableEvent", "BindableFunction" })
 
+--[[
 	Returns the calling function via `debug.info`
 
 	@return `function | nil` The calling function or nil if not found.
@@ -5726,6 +5652,7 @@ local function getcallingfunction()
 	return debug.info(BaseLevel, "f")
 end
 
+--[[
 	Returns the calling line of the script that called the function via `debug.info`
 
 	@return number Returns the line number of the calling script.
@@ -5749,6 +5676,7 @@ local function getcallingline()
 	return debug.info(BaseLevel, "l")
 end
 
+--[[
 	Returns the calling source of the script that called the function via `debug.info`
 
 	@return string Returns the source of the calling script.
@@ -5772,6 +5700,7 @@ local function getcallingsource()
 	return debug.info(BaseLevel, "s")
 end
 
+-- metamethod hooks
 wax.shared.NamecallHook = wax.shared.Hooking.HookMetaMethod(game, "__namecall", function(...)
 	local self = ...
 	local Method = getnamecallmethod()
@@ -5807,8 +5736,7 @@ wax.shared.NamecallHook = wax.shared.Hooking.HookMetaMethod(game, "__namecall", 
 			return
 		elseif not Log.Ignored then
 			Log:Call(Info)
-			
-
+			-- For RemoteFunction return value (ex: local result = RemoteFunction:InvokeServer())
 			if self.ClassName == "RemoteFunction" and (Method == "InvokeServer" or Method == "invokeServer") then
 				Log = wax.shared.Logs.Incoming[self]
 				if not Log then
@@ -5854,6 +5782,7 @@ wax.shared.NamecallHook = wax.shared.Hooking.HookMetaMethod(game, "__namecall", 
 	return wax.shared.NamecallHook(...)
 end)
 
+-- function hooks
 local FunctionsToHook
 do
 	local BindableFunction = Instance.new("BindableFunction")
@@ -5915,8 +5844,7 @@ for _, Function in next, FunctionsToHook do
 				return
 			elseif not Log.Ignored then
 				Log:Call(Info)
-				
-
+				-- For RemoteFunction return value (ex: local result = RemoteFunction:InvokeServer())
 				if self.ClassName == "RemoteFunction" and (Method == "InvokeServer" or Method == "invokeServer") then
 					Log = wax.shared.Logs.Incoming[self]
 					if not Log then
@@ -6094,8 +6022,11 @@ end
 
 return FileHelper
 end)() end,
-    [26] = function()local wax,script,require=ImportGlobals(26)local ImportGlobals return (function(...)
+    [26] = function()local wax,script,require=ImportGlobals(26)local ImportGlobals return (function(...)-- Logger
+-- ActualMasterOogway
+-- December 8, 2024
 
+--[=[
     A simple logging utility that writes messages to a file. Supports different log levels
     and can be configured to overwrite or append to the log file.
 
@@ -6133,6 +6064,7 @@ local function createDirectoryRecursive(path)
 	end
 end
 
+--[=[
     Generates a unique file name for the log file. The file name is based on the current
     job ID, ensuring it is unique per server instance but consistent across multiple
     executions within the same server.
@@ -6146,6 +6078,7 @@ function Logger:GenerateFileName()
 	return `{self.logFileDirectory}/{JobIdNumber * 1.7 // 1.8}_{timestamp}.log`
 end
 
+--[=[
     Creates a new Logger instance.
 
     @param logFilePath string The path to the log file.
@@ -6178,6 +6111,7 @@ function Logger.new(logFilePath: string, logLevel: number?, overwrite: boolean?)
 	return self
 end
 
+--[=[
     Logs a message to the file.
 
     @param level number The log level of the message.
@@ -6200,6 +6134,7 @@ function Logger:Log(level: number, threadId: string, message: string)
 	end
 end
 
+--[=[
     Logs a debug message.
 
     @param threadId string The ID of the thread or source of the log message.
@@ -6209,6 +6144,7 @@ function Logger:Debug(threadId: string, message: string)
 	self:Log(Logger.LOG_LEVELS.DEBUG, threadId, message)
 end
 
+--[=[
     Logs an info message.
 
     @param threadId string The ID of the thread or source of the log message.
@@ -6218,6 +6154,7 @@ function Logger:Info(threadId: string, message: string)
 	self:Log(Logger.LOG_LEVELS.INFO, threadId, message)
 end
 
+--[=[
     Logs a warning message.
 
     @param threadId string The ID of the thread or source of the log message.
@@ -6227,6 +6164,7 @@ function Logger:Warning(threadId: string, message: string)
 	self:Log(Logger.LOG_LEVELS.WARNING, threadId, message)
 end
 
+--[=[
     Logs an error message.
 
     @param threadId string The ID of the thread or source of the log message.
@@ -6238,8 +6176,7 @@ end
 
 return Logger
 end)() end,
-    [46] = function()local wax,script,require=ImportGlobals(46)local ImportGlobals return (function(...)
-
+    [46] = function()local wax,script,require=ImportGlobals(46)local ImportGlobals return (function(...)--[[
 	Main Window Logic for cobalt, all UI elements are created and managed here.
 ]]
 
@@ -6296,6 +6233,7 @@ local Images = {
 	BindableFunction = "rbxassetid://112264959079193",
 }
 
+-- Functions
 local function UpdateLogNameSize(Log)
 	local TextSizeX, _TextSizeY =
 		wax.shared.GetTextBounds("x" .. #Log.Calls, Log.Button.Calls.FontFace, Log.Button.Calls.TextSize)
@@ -6308,6 +6246,7 @@ local function GetDPIScale()
 end
 wax.shared.GetDPIScale = GetDPIScale
 
+-- ContentProvider PreloadAsync bypass
 Images = AssetManager.GetRemoteImages(Images)
 
 local CobaltLogo = AssetManager.GetImage("Logo")
@@ -6371,6 +6310,7 @@ do
 	end)
 end
 
+-- Resizing
 Resize.new({
 	MainFrame = MainFrame,
 
@@ -6380,6 +6320,7 @@ Resize.new({
 	HandleSize = 6,
 })
 
+-- Context Menus
 local CurrentContext
 local ContextMenu = Interface.New("Frame", {
 	AutomaticSize = Enum.AutomaticSize.XY,
@@ -6614,6 +6555,7 @@ local function CreateContextMenu(Parent: GuiObject, Options: {}, MouseOnCursorPo
 	return ContextData
 end
 
+-- Sonner toast
 local SonnerUI = Interface.New("ScrollingFrame", {
 	Name = "Sonner",
 	BackgroundTransparency = 1,
@@ -6629,6 +6571,7 @@ local SonnerUI = Interface.New("ScrollingFrame", {
 
 wax.shared.Sonner.init(SonnerUI)
 
+-- Modal
 local OpenedModal
 local ModalBackground = Interface.New("TextButton", {
 	BackgroundColor3 = Color3.fromRGB(0, 0, 0),
@@ -6753,6 +6696,7 @@ local function CreateModalTop(Title: string, Icon: string, Parent: GuiObject)
 	return ModalTitle, ModalIcon
 end
 
+-- Settings
 local SettingsFrame = Interface.New("TextButton", {
 	AnchorPoint = Vector2.new(0.5, 0.5),
 	BackgroundColor3 = Color3.fromRGB(10, 10, 10),
@@ -6812,6 +6756,7 @@ local SettingsScrollingFrame = Interface.New("ScrollingFrame", {
 	},
 })
 
+-- Plugins
 local PluginsFrame = Interface.New("TextButton", {
 	AnchorPoint = Vector2.new(0.5, 0.5),
 	BackgroundColor3 = Color3.fromRGB(10, 10, 10),
@@ -6874,8 +6819,7 @@ local PluginsScrollingFrame = Interface.New("ScrollingFrame", {
 local SettingsBuilder = {}
 local SectionBuilder = {}
 do
-	
-
+	-- Builders
 	SettingsBuilder.__index = SettingsBuilder
 	SectionBuilder.__index = SectionBuilder
 
@@ -6892,8 +6836,7 @@ do
 		}, SectionBuilder)
 	end
 
-	
-
+	-- Sections Constructor
 	function SettingsBuilder:CreateSection(SectionName: string, DataSavePrefix: string?)
 		local Section = Interface.New("Frame", {
 			AutomaticSize = Enum.AutomaticSize.Y,
@@ -6920,10 +6863,8 @@ do
 		return SectionBuilder.new(Section, DataSavePrefix)
 	end
 
-	
-
-	
-
+	-- Creates a horizontal sub-row inside a section and returns a SectionBuilder for it.
+	-- Use this when you want multiple elements side-by-side (e.g. two buttons in one row).
 	function SectionBuilder:CreateRow(Padding: UDim?)
 		local Row = Interface.New("Frame", {
 			BackgroundTransparency = 1,
@@ -6953,8 +6894,7 @@ do
 		})
 	end
 
-	
-
+	-- Section Element Constructors
 	function SectionBuilder:CreateButton(Text: string, Callback: () -> (), TextSize: number?)
 		local Button = Interface.New("TextButton", {
 			BackgroundColor3 = Color3.fromRGB(15, 15, 15),
@@ -7808,8 +7748,7 @@ do
 		Parent = HeaderLabel,
 	})
 
-	
-
+	-- Container that holds all per-plugin cards
 	local PluginCardsContainer = Interface.New("Frame", {
 		AutomaticSize = Enum.AutomaticSize.Y,
 		BackgroundTransparency = 1,
@@ -7843,8 +7782,7 @@ do
 			},
 		})
 
-		
-
+		-- Left accent bar
 		Interface.New("Frame", {
 			AnchorPoint = Vector2.new(0, 0.5),
 			BackgroundColor3 = AccentColor,
@@ -7853,6 +7791,7 @@ do
 			BorderSizePixel = 0,
 			Parent = Card,
 		})
+
 
 		local Content = Interface.New("Frame", {
 			AutomaticSize = Enum.AutomaticSize.Y,
@@ -7874,8 +7813,7 @@ do
 			},
 		})
 
-		
-
+		-- Title row: name + badge
 		local TitleRow = Interface.New("Frame", {
 			AutomaticSize = Enum.AutomaticSize.Y,
 			BackgroundTransparency = 1,
@@ -7900,8 +7838,7 @@ do
 			Parent = TitleRow,
 		})
 
-		
-
+		-- Status badge (only shown for errors)
 		if IsError then
 			local Badge = Interface.New("Frame", {
 				AutomaticSize = Enum.AutomaticSize.XY,
@@ -7933,8 +7870,7 @@ do
 			})
 		end
 
-		
-
+		-- Meta line (version · author  OR  file path)
 		if Meta ~= "" then
 			Interface.New("TextLabel", {
 				Text = Meta,
@@ -7951,8 +7887,7 @@ do
 			})
 		end
 
-		
-
+		-- Body (description or error message)
 		if Body ~= "" then
 			Interface.New("TextLabel", {
 				Text = Body,
@@ -7979,8 +7914,7 @@ do
 		local LoadedCount = #Registry.Plugins
 		local ErrorCount  = #Registry.Errored
 
-		
-
+		-- Update summary label
 		local SummaryParts = {}
 		if LoadedCount > 0 then
 			table.insert(SummaryParts, `<font color="#37b964"><b>{LoadedCount}</b></font> loaded`)
@@ -7994,8 +7928,7 @@ do
 		SummaryLabel.RichText = true
 		SummaryLabel.Text = table.concat(SummaryParts, `<font transparency="0.6"> · </font>`)
 
-		
-
+		-- Errored plugins first (most actionable)
 		for _, ErrorInfo in Registry.Errored do
 			local FileName = string.match(ErrorInfo.FilePath, "([^/]+)$") or ErrorInfo.FilePath
 			local Title = ErrorInfo.Name or FileName
@@ -8005,8 +7938,7 @@ do
 			CreatePluginCard(true, Title, Meta, ErrorInfo.Error)
 		end
 
-		
-
+		-- Loaded plugins
 		for _, PluginInfo in Registry.Plugins do
 			local Data = PluginInfo.PluginData
 			local Name = Data.Name or "Unknown"
@@ -8018,6 +7950,8 @@ do
 	end)
 end
 
+-- Main Settings
+-- God this warning box code is so ass 🥀
 if #wax.shared.ExecutorSupport.FailedChecks.NonEssential > 0 then
 	local WarningDisplay = Interface.New("Frame", {
 		AnchorPoint = Vector2.new(1, 0.5),
@@ -8397,13 +8331,11 @@ LoggingSection:CreateButton("Export Logs to HTML", function()
 	wax.shared.Sonner.promise(function(UpdateProgress)
 		assert(typeof(writefile) == "function", "Exploit does not support writefile")
 		
-		
-
+		--// Collect all logs \\--
 		local AllCalls = SessionExporter:FetchAllLogs()
 		local SessionData = SessionExporter:GetSessionData(AllCalls)
 
-		
-
+		--// Data Processing \\--
 		UpdateProgress("Sorting calls...")
 		SessionExporter:SortCalls(AllCalls)
 		local Events, StringMap = SessionExporter:ProcessCalls(
@@ -8412,8 +8344,7 @@ LoggingSection:CreateButton("Export Logs to HTML", function()
 			UpdateProgress
 		)
 
-		
-
+		--// Export \\--
 		local FileName = `Cobalt_Session_{os.time()}.html`
 		writefile(
 			FileName,
@@ -8477,6 +8408,7 @@ for Order, Data in pairs(Credits) do
 	})
 end
 
+-- Info
 local InfoFrame = Interface.New("TextButton", {
 	AnchorPoint = Vector2.new(0.5, 0.5),
 	BackgroundColor3 = Color3.fromRGB(10, 10, 10),
@@ -8543,6 +8475,7 @@ local InfoTabs = Interface.New("Frame", {
 	},
 })
 
+-- Right gradient (always visible)
 Interface.New("Frame", {
 	AnchorPoint = Vector2.new(1, 0),
 	Position = UDim2.new(1, -6, 0, 44),
@@ -8560,6 +8493,7 @@ Interface.New("Frame", {
 	},
 })
 
+-- Left gradient (only visible after scrolling)
 local LeftGradient = Interface.New("Frame", {
 	Position = UDim2.new(0, 4, 0, 44),
 	Size = UDim2.new(0, 30, 0, 36),
@@ -9218,6 +9152,7 @@ local FunctionInfoText = Interface.New("TextLabel", {
 	Parent = FunctionScrollingFrame,
 })
 
+-- Search
 local ResultInfo = {}
 local CurrentResults = {}
 local SelectedResult = -1
@@ -9315,6 +9250,7 @@ local SearchFilterList = Interface.New("ScrollingFrame", {
 	},
 })
 
+-- Search Filter
 local ExcludeSearchClass = {}
 local SearchFilterButtons = {}
 
@@ -9512,6 +9448,7 @@ local function CreateSearchResult(Instance: Instance, Type: string)
 	return SearchResult
 end
 
+-- Topbar
 local TopBar = Interface.New("Frame", {
 	BackgroundColor3 = Color3.fromRGB(25, 25, 25),
 	Size = UDim2.new(1, 0, 0, 36),
@@ -9536,6 +9473,7 @@ local TopBar = Interface.New("Frame", {
 })
 Interface.HideCorner(TopBar, UDim2.fromScale(1, 0.5), Vector2.yAxis)
 
+-- Topbar Buttons
 local TopButtons = Interface.New("Frame", {
 	BackgroundTransparency = 1,
 	Size = UDim2.fromScale(1, 1),
@@ -9640,6 +9578,7 @@ end)
 Drag.Setup(MainFrame, TopBar)
 Drag.Setup(ShowButton, ShowButton)
 
+-- Remote List
 local LeftList = Interface.New("Frame", {
 	BackgroundTransparency = 1,
 	AnchorPoint = Vector2.yAxis,
@@ -9655,6 +9594,7 @@ local LeftList = Interface.New("Frame", {
 	},
 })
 
+-- Tabs
 local RemoteTabContainer = Interface.New("Frame", {
 	BackgroundColor3 = Color3.fromRGB(25, 25, 25),
 	Size = UDim2.new(1, 0, 0, 30),
@@ -9671,6 +9611,7 @@ local RemoteTabContainer = Interface.New("Frame", {
 	},
 })
 
+-- Remote List
 local RemoteListWrapper = Interface.New("Frame", {
 	AnchorPoint = Vector2.yAxis,
 	BackgroundColor3 = Color3.fromRGB(25, 25, 25),
@@ -9745,6 +9686,7 @@ do
 	end)
 end
 
+-- Main Remote thing
 local LogsWrapper = Interface.New("Frame", {
 	AnchorPoint = Vector2.one,
 	BackgroundTransparency = 1,
@@ -9796,6 +9738,8 @@ local LogsPagination = Interface.New("Frame", {
 		Padding = UDim.new(0, 6),
 	},
 })
+
+-- Functions
 
 function ShowTab(Tab)
 	for _, Object in pairs(RemoteList:GetChildren()) do
@@ -10574,9 +10518,11 @@ function CreateCallFrame(CallInfo)
 	return CallFrame
 end
 
+-- UI Handling
 CreateRemoteTab("Outgoing", true, wax.shared.Logs.Outgoing)
 CreateRemoteTab("Incoming", false, wax.shared.Logs.Incoming)
 
+-- Search Functions
 function OpenSearch()
 	OpenModal(SearchFrame)
 	UpdateSearch()
@@ -10668,6 +10614,7 @@ end
 
 SearchBox:GetPropertyChangedSignal("Text"):Connect(UpdateSearch)
 
+-- Call Functions
 function OpenInfo(CallInfo)
 	if wax.shared.CobaltPluginManager and wax.shared.CobaltPluginManager.Initialized then
 		for _, Interceptor in wax.shared.CobaltPluginManager.Registry.UIHooks.RemoteInfo.Intercept do
@@ -10890,10 +10837,12 @@ local UIHelper = require(UIUtils.Helper)
 local Signals = require(script.Parent.Parent.Signal)
 local CodeGen = require(script.Parent.Parent.CodeGen.Generator)
 
+-- File Helper
 local FileHelperUtil = require(script.Parent.Parent.FileHelper)
 
 local PluginFiles = FileHelperUtil.new("Cobalt/Plugins")
 
+-- Templates
 local TemplatePluginData = {
     Name = "Untitled Plugin",
     Description = "No description provided.",
@@ -10902,6 +10851,7 @@ local TemplatePluginData = {
     Game = "*",
 }
 
+--[[
     Validates plugin data against a template.
 
     @param Data: The plugin data to validate.
@@ -10920,6 +10870,8 @@ local function Validate(Data, Template)
     return NewData
 end
 
+-- Helpers
+--[[
     Handles a plugin error.
 
     @param FilePath: The path to the plugin file.
@@ -10963,6 +10915,7 @@ local function PluginErrored(FilePath, Error)
     end
 end
 
+--[[
     Creates a plugin environment for a plugin.
 
     @param FilePath: The path to the plugin file.
@@ -10971,8 +10924,7 @@ end
     @return: The plugin environment.
 ]]
 local function CreatePluginEnvironement(FilePath: string, PluginCallback: (...any) -> (...any), PluginThread: thread)
-    
-
+    -- Setup global Cobalt table
     local Cobalt = {
         Sonner = wax.shared.Sonner,
         UI = { RemoteInfo = {}, ContextMenu = {} },
@@ -10981,8 +10933,7 @@ local function CreatePluginEnvironement(FilePath: string, PluginCallback: (...an
         ExecutorSupport = wax.shared.ExecutorSupport
     }
     
-    
-
+    -- Settings Proxy
     Cobalt.Settings = setmetatable({}, {
         __index = function(_, key)
             return wax.shared.SaveManager:GetState(key, false)
@@ -10994,8 +10945,7 @@ local function CreatePluginEnvironement(FilePath: string, PluginCallback: (...an
 
     local CurrentPluginData = nil
     local CurrentPluginSettings = nil
-    
-
+    --[[
         Binds a callback to fire when this plugin is unloaded.
 
         @param Callback: The function to call on unload.
@@ -11009,10 +10959,8 @@ local function CreatePluginEnvironement(FilePath: string, PluginCallback: (...an
         end
     end
 
-    
-
-    
-
+    -- UI Functions
+    --[[
         Gets the currently selected remote instance in the UI.
 
         @return: The selected remote instance and its type.
@@ -11022,8 +10970,7 @@ local function CreatePluginEnvironement(FilePath: string, PluginCallback: (...an
         return Log and Log.Instance or nil, Log and Log.Type or nil
     end
 
-    
-
+    --[[
         Creates a custom blank modal.
 
         @param Title: The title of the modal.
@@ -11284,8 +11231,7 @@ local function CreatePluginEnvironement(FilePath: string, PluginCallback: (...an
         return ModalInterface
     end
 
-    
-
+    --[[
         Creates a plugin settings tab, (visible after clicking a plugin in the plugins list)
 
         @return: The plugin settings tab.
@@ -11298,8 +11244,7 @@ local function CreatePluginEnvironement(FilePath: string, PluginCallback: (...an
         return CurrentPluginSettings
     end
     
-    
-
+    --[[
         Creates a remote info tab, (visible after clicking a remote)
 
         @param TabName: The name of the tab.
@@ -11313,8 +11258,7 @@ local function CreatePluginEnvironement(FilePath: string, PluginCallback: (...an
         return TabContent, TabUI
     end
 
-    
-
+    --[[
         Disables the default footer buttons for a specific Remote Info tab.
 
         @param TabName: The name of the tab to disable default buttons for.
@@ -11332,18 +11276,15 @@ local function CreatePluginEnvironement(FilePath: string, PluginCallback: (...an
 		end
 	end
 
-    
-
+    --[[
 		Empty function that gets hooked by Window.luau.
 		When called, it forces the RemoteInfo footer buttons to update.
 	]]
 	function Cobalt.UI.RemoteInfo.UpdateFooterButtons()
-		
-
+		-- Hooked by Window.luau
 	end
 
-	
-
+	--[[
 		Adds a custom footer button to a specific Remote Info tab.
 
 		@param TabName: The name of the tab to add the button to.
@@ -11387,8 +11328,7 @@ local function CreatePluginEnvironement(FilePath: string, PluginCallback: (...an
 		end
 	end
     
-    
-
+    --[[
         Binds a function to be called when a remote is opened in the remote info tab.
 
         @param Callback: The function to be called.
@@ -11405,8 +11345,7 @@ local function CreatePluginEnvironement(FilePath: string, PluginCallback: (...an
         end
     end
 
-    
-
+    --[[
         Adds an interceptor to conditionally prevent a remote info modal from opening.
         The callback should return `false` to block the modal from opening, or `true`/`nil` to allow it.
 
@@ -11424,8 +11363,7 @@ local function CreatePluginEnvironement(FilePath: string, PluginCallback: (...an
         end
     end
 
-    
-
+    --[[
         Adds a custom context menu option to specific elements of the UI.
         
         @param MenuType: "RemoteList" | "CallList"
@@ -11456,8 +11394,7 @@ local function CreatePluginEnvironement(FilePath: string, PluginCallback: (...an
         end
     end
 
-    
-
+    --[[
         Uses cobalt's built-in syntax highlighter to colorize Luau code in RichText.
 
         @param code: The Luau code to colorize.
@@ -12075,8 +12012,7 @@ local ObjectTree = {
                                 5,
                                 {
                                     "SessionHTMLView",
-                                    Value = "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>Cobalt - Session Viewer</title>\n    <link\n      rel=\"icon\"\n      type=\"image/png\"\n      href=\"https://cobalt-xil.pages.dev/Assets/Logo.png\"\n    />\n    <style>\n      :root {\n        --bg-color: #0b0b0b;\n        --surface-color: #161b22;\n        --border-color: #30363d;\n        --text-primary: #c9d1d9;\n        --text-secondary: #8b949e;\n        --accent-blue: #58a6ff;\n        --accent-green: #3fb950;\n        --accent-orange: #d29922;\n        --accent-red: #ff7b72;\n        --font-family: \"Inter\", -apple-system, BlinkMacSystemFont, \"Segoe UI\",\n          Helvetica, Arial, sans-serif;\n      }\n\n      body {\n        background-color: var(--bg-color);\n        color: var(--text-primary);\n        font-family: var(--font-family);\n        margin: 0;\n        padding: 0;\n        font-size: 13px;\n        height: 100vh;\n        display: flex;\n        flex-direction: column;\n        overflow: hidden;\n      }\n\n      /* Top Header */\n      .app-header {\n        height: 50px;\n        border-bottom: 1px solid var(--border-color);\n        display: flex;\n        align-items: center;\n        justify-content: space-between;\n        padding: 0 20px;\n        background-color: var(--bg-color);\n        flex-shrink: 0;\n        z-index: 10;\n      }\n\n      .brand {\n        display: flex;\n        align-items: center;\n        gap: 10px;\n        font-size: 16px;\n        font-weight: 600;\n        color: #fff;\n      }\n\n      .brand-icon {\n        width: 20px;\n        height: 20px;\n        background-image: url(\"https://cobalt-xil.pages.dev/Assets/Logo.png\");\n        background-size: contain;\n        background-repeat: no-repeat;\n        background-position: center;\n      }\n\n      .session-container {\n        position: relative;\n        display: flex;\n        flex-direction: column;\n        align-items: flex-end;\n      }\n\n      .session-info {\n        color: var(--text-secondary);\n        font-family: monospace;\n        font-size: 12px;\n        cursor: pointer;\n        padding: 2px 5px;\n        border-radius: 4px;\n        transition: background-color 0.2s ease;\n        user-select: none;\n      }\n\n      .session-info:hover {\n        background-color: #1c2128;\n      }\n\n      .session-id {\n        color: #fff;\n      }\n\n      .session-tooltip {\n        position: absolute;\n        top: 100%;\n        right: 0;\n        background-color: #1c2128;\n        border: 1px solid var(--border-color);\n        border-radius: 6px;\n        padding: 10px;\n        z-index: 100;\n        width: 250px;\n        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);\n        margin-top: 5px;\n        opacity: 0;\n        transform: translateY(-10px);\n        pointer-events: none;\n        visibility: hidden;\n        transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;\n      }\n\n      .session-tooltip::before {\n        content: \"\";\n        position: absolute;\n        top: -10px;\n        left: 0;\n        width: 100%;\n        height: 10px;\n        background: transparent;\n      }\n\n      .session-container:hover .session-tooltip,\n      .session-tooltip.visible {\n        opacity: 1;\n        transform: translateY(0);\n        pointer-events: auto;\n        visibility: visible;\n      }\n\n      .tooltip-row {\n        display: flex;\n        justify-content: space-between;\n        margin-bottom: 5px;\n        font-size: 11px;\n      }\n\n      .tooltip-label {\n        color: var(--text-secondary);\n      }\n\n      .tooltip-value {\n        color: var(--text-primary);\n        font-family: monospace;\n        user-select: text;\n      }\n\n      /* Mobile Responsiveness */\n      @media (max-width: 768px) {\n        .app-header {\n          height: auto;\n          flex-wrap: wrap;\n          padding: 10px;\n          gap: 10px;\n        }\n\n        .brand {\n          font-size: 14px;\n        }\n\n        .session-container {\n          align-items: flex-start;\n          display: none;\n          /* Hide session info on mobile to save space */\n        }\n\n        .trace-toolbar {\n          height: auto;\n          flex-wrap: wrap;\n          padding: 10px;\n          gap: 10px;\n          justify-content: space-between;\n        }\n\n        /* Hide non-essential info on mobile */\n        .trace-toolbar > div:first-child,\n        #statsLabel {\n          display: none;\n        }\n\n        .search-widget {\n          width: 100%;\n          order: 3;\n          margin-top: 5px;\n        }\n\n        .view-toggle {\n          width: 100%;\n          display: flex;\n        }\n\n        .view-btn {\n          flex: 1;\n          text-align: center;\n        }\n\n        .row-list {\n          width: 60vw;\n          /* Use viewport width to prevent runaway expansion */\n        }\n\n        .col-list {\n          width: 60vw;\n          flex: none;\n        }\n\n        .details-panel.visible {\n          position: fixed;\n          top: 0;\n          left: 0;\n          width: 100%;\n          height: 100%;\n          z-index: 1000;\n          border-left: none;\n        }\n\n        .details-header-top {\n          margin-top: 10px;\n        }\n\n        /* Fix Details Header Overflow */\n        .details-title-group {\n          min-width: 0;\n          flex: 1;\n          margin-right: 10px;\n        }\n\n        .details-name-large {\n          white-space: nowrap;\n          overflow: hidden;\n          text-overflow: ellipsis;\n        }\n\n        .details-actions {\n          flex-shrink: 0;\n        }\n\n        /* Allow wrapping for paths on mobile */\n        .details-path-row,\n        .origin-row,\n        .remote-path-copy {\n          white-space: normal !important;\n          word-break: break-all;\n        }\n      }\n\n      /* Scrollbars */\n      ::-webkit-scrollbar {\n        width: 10px;\n        height: 10px;\n      }\n\n      ::-webkit-scrollbar-track {\n        background: #0d1117;\n      }\n\n      ::-webkit-scrollbar-thumb {\n        background: #30363d;\n        border-radius: 5px;\n        border: 2px solid #0d1117;\n      }\n\n      ::-webkit-scrollbar-thumb:hover {\n        background: #8b949e;\n      }\n\n      ::-webkit-scrollbar-corner {\n        background: var(--bg-color);\n      }\n\n      /* Heatmap Styles */\n      .heatmap-container {\n        flex: 1;\n        display: none;\n        flex-direction: column;\n        overflow: hidden;\n        background-color: var(--bg-color);\n        position: relative;\n      }\n\n      .heatmap-container.visible {\n        display: flex;\n      }\n\n      .heatmap-canvas {\n        flex: 1;\n        width: 100%;\n        height: 100%;\n      }\n\n      .view-toggle {\n        display: flex;\n        background: #1c2128;\n        border: 1px solid var(--border-color);\n        border-radius: 4px;\n        overflow: hidden;\n      }\n\n      .view-btn {\n        padding: 4px 12px;\n        font-size: 12px;\n        cursor: pointer;\n        color: var(--text-secondary);\n        background: transparent;\n        border: none;\n        transition: all 0.2s;\n      }\n\n      .view-btn.active {\n        background: var(--accent-blue);\n        color: white;\n      }\n\n      .view-btn:hover:not(.active) {\n        background: #30363d;\n      }\n\n      /* Main Layout */\n      .main-container {\n        display: flex;\n        flex: 1;\n        overflow: hidden;\n      }\n\n      /* Left Panel: Trace View */\n      .trace-panel {\n        flex: 1;\n        display: flex;\n        flex-direction: column;\n        border-right: 1px solid var(--border-color);\n        min-width: 0;\n        overflow: hidden;\n      }\n\n      .trace-toolbar {\n        height: 40px;\n        border-bottom: 1px solid var(--border-color);\n        display: flex;\n        align-items: center;\n        padding: 0 10px;\n        gap: 10px;\n        background-color: var(--bg-color);\n        flex-shrink: 0;\n      }\n\n      .search-widget {\n        display: flex;\n        flex-direction: column;\n        background-color: var(--bg-color);\n        border: 1px solid var(--border-color);\n        border-radius: 6px;\n        width: 320px;\n        position: relative;\n        transition: border-color 0.2s ease, border-radius 0.2s ease;\n        box-sizing: border-box;\n      }\n\n      .search-widget:focus-within {\n        border-color: var(--accent-blue);\n      }\n\n      .search-widget:focus-within > .search-options {\n        border-color: var(--accent-blue);\n      }\n\n      .search-widget.expanded {\n        border-bottom-left-radius: 0;\n        border-bottom-right-radius: 0;\n        border-bottom-color: transparent;\n      }\n\n      .search-row {\n        display: flex;\n        align-items: center;\n        padding: 4px;\n      }\n\n      .search-chevron {\n        cursor: pointer;\n        padding: 2px;\n        color: var(--text-secondary);\n        display: flex;\n        align-items: center;\n        justify-content: center;\n        transition: transform 0.2s ease, color 0.2s ease;\n        width: 20px;\n        height: 20px;\n        border-radius: 4px;\n      }\n\n      .search-chevron:hover {\n        background-color: rgba(255, 255, 255, 0.1);\n        color: var(--text-primary);\n      }\n\n      .search-chevron.expanded {\n        transform: rotate(90deg);\n      }\n\n      .search-input-container {\n        flex: 1;\n        display: flex;\n        align-items: center;\n        margin-left: 4px;\n      }\n\n      .search-input {\n        background: transparent;\n        border: none;\n        color: var(--text-primary);\n        font-size: 12px;\n        width: 100%;\n        outline: none;\n        height: 20px;\n      }\n\n      .search-options {\n        transition: border-color 0.2s ease, border-radius 0.2s ease;\n        display: none;\n        padding: 10px;\n        border: 1px solid var(--border-color);\n        border-top: none;\n        background-color: var(--bg-color);\n        flex-direction: column;\n        gap: 12px;\n        position: absolute;\n        top: 100%;\n        left: -1px;\n        right: -1px;\n        z-index: 100;\n        border-bottom-left-radius: 6px;\n        border-bottom-right-radius: 6px;\n        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);\n        box-sizing: border-box;\n      }\n\n      .search-options.visible {\n        display: flex;\n      }\n\n      .time-range-row {\n        display: flex;\n        align-items: center;\n        gap: 8px;\n        font-size: 11px;\n        color: var(--text-secondary);\n      }\n\n      .filter-options-row {\n        display: flex;\n        flex-wrap: wrap;\n        gap: 8px;\n        padding-top: 8px;\n        border-top: 1px solid var(--border-color);\n      }\n\n      .filter-checkbox-label {\n        display: flex;\n        align-items: center;\n        gap: 4px;\n        font-size: 11px;\n        color: var(--text-secondary);\n        cursor: pointer;\n        user-select: none;\n      }\n\n      .filter-checkbox-label:hover {\n        color: var(--text-primary);\n      }\n\n      .filter-checkbox {\n        accent-color: var(--accent-blue);\n      }\n\n      .time-input-styled {\n        background-color: #161b22;\n        border: 1px solid var(--border-color);\n        color: var(--text-primary);\n        border-radius: 4px;\n        padding: 4px 8px;\n        width: 60px;\n        outline: none;\n        font-size: 11px;\n        transition: border-color 0.2s ease;\n        margin: 0 2px;\n      }\n\n      .time-input-styled:focus {\n        border-color: var(--accent-blue);\n      }\n\n      .unit-select {\n        background-color: #161b22;\n        border: 1px solid var(--border-color);\n        color: var(--text-primary);\n        border-radius: 4px;\n        outline: none;\n        font-size: 11px;\n        padding: 3px 6px;\n        cursor: pointer;\n        transition: border-color 0.2s ease;\n      }\n\n      .unit-select:focus {\n        border-color: var(--accent-blue);\n      }\n\n      .trace-header-row {\n        display: flex;\n        height: 30px;\n        border-bottom: 1px solid var(--border-color);\n        background-color: var(--surface-color);\n        font-size: 11px;\n        color: var(--text-secondary);\n        line-height: 30px;\n        flex-shrink: 0;\n      }\n\n      .col-list {\n        width: 300px;\n        padding-left: 15px;\n        border-right: 1px solid var(--border-color);\n        flex-shrink: 0;\n        z-index: 5;\n        background-color: var(--surface-color);\n        box-sizing: border-box;\n        /* Match row-list */\n      }\n\n      .col-timeline {\n        flex: 1;\n        position: relative;\n        overflow: hidden;\n        min-width: calc(100vw - 300px);\n      }\n\n      .timeline-ruler {\n        position: relative;\n        top: 0;\n        left: 0;\n        height: 100%;\n        pointer-events: none;\n      }\n\n      .tick {\n        position: absolute;\n        top: 0;\n        bottom: 0;\n        border-left: 1px solid #30363d;\n        font-size: 10px;\n        color: #484f58;\n        padding-left: 4px;\n      }\n\n      .trace-rows {\n        flex: 1;\n        overflow: auto;\n        /* Ensure both scrollbars appear */\n        position: relative;\n        contain: strict;\n      }\n\n      .virtual-spacer {\n        position: absolute;\n        top: 0;\n        left: 0;\n        width: 1px;\n      }\n\n      .virtual-content {\n        position: absolute;\n        top: 0;\n        left: 0;\n        width: 100%;\n      }\n\n      .trace-row {\n        display: flex;\n        height: 28px;\n        /* align-items: center;  Removed to allow children to stretch */\n        cursor: pointer;\n        /* border-bottom: 1px solid #1c2128; Moved to children */\n        width: fit-content;\n        min-width: 100%;\n        transition: background-color 0.1s ease;\n        box-sizing: border-box;\n      }\n\n      .trace-row:hover {\n        background-color: #1c2128;\n      }\n\n      .trace-row.selected {\n        background-color: rgba(88, 166, 255, 0.1);\n      }\n\n      .trace-row.hidden {\n        display: none;\n      }\n\n      .trace-row:hover * {\n        background-color: #1c2128;\n      }\n\n      .trace-row.selected * {\n        background-color: #1c2333;\n      }\n\n      .row-list {\n        width: 300px;\n        padding-left: 15px;\n        /* Use box-shadow for sticky border to prevent it from disappearing */\n        box-shadow: 1px 0 0 0 var(--border-color);\n        border-right: none;\n        border-bottom: 1px solid #1c2128;\n        /* Added border here */\n        display: flex;\n        align-items: center;\n        overflow: hidden;\n        flex-shrink: 0;\n        box-sizing: border-box;\n        position: sticky;\n        left: 0;\n        background-color: var(--bg-color);\n        z-index: 2;\n        transition: background-color 0.1s ease;\n        height: 100%;\n      }\n\n      .row-timeline {\n        flex: 1;\n        position: relative;\n        height: 100%;\n        overflow: hidden;\n        border-bottom: 1px solid #1c2128;\n        /* Added border here */\n        box-sizing: border-box;\n        /* Ensure border is inside height */\n      }\n\n      .type-icon {\n        width: 16px;\n        height: 16px;\n        margin-right: 8px;\n        flex-shrink: 0;\n        background-size: contain;\n        background-repeat: no-repeat;\n        background-position: center;\n      }\n\n      .remote-name {\n        white-space: nowrap;\n        overflow: hidden;\n        text-overflow: ellipsis;\n        color: var(--text-primary);\n        font-size: 12px;\n      }\n\n      .timeline-marker {\n        position: absolute;\n        top: 10px;\n        height: 8px;\n        min-width: 4px;\n        border-radius: 4px;\n        opacity: 0.9;\n      }\n\n      .timeline-marker.incoming {\n        background: linear-gradient(90deg, var(--accent-green), #2ea043);\n      }\n\n      .timeline-marker.outgoing {\n        background: linear-gradient(90deg, var(--accent-orange), #b08800);\n      }\n\n      /* Right Panel: Details */\n      .details-panel {\n        width: 0;\n        opacity: 0;\n        background-color: var(--bg-color);\n        border-left: 0 solid var(--border-color);\n        display: flex;\n        flex-direction: column;\n        padding: 0;\n        box-sizing: border-box;\n        overflow-y: auto;\n        overflow-x: hidden;\n        position: relative;\n        flex-shrink: 0;\n        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease,\n          padding 0.3s ease;\n      }\n\n      .details-panel.visible {\n        width: 450px;\n        opacity: 1;\n        padding: 20px;\n        border-left: 1px solid var(--border-color);\n      }\n\n      /* Header */\n      .details-header-top {\n        display: flex;\n        align-items: center;\n        justify-content: space-between;\n        margin-bottom: 10px;\n      }\n\n      .details-title-group {\n        display: flex;\n        align-items: center;\n        gap: 10px;\n      }\n\n      .details-icon-large {\n        width: 32px;\n        height: 32px;\n        background-size: contain;\n        background-repeat: no-repeat;\n        background-position: center;\n      }\n\n      .details-name-large {\n        font-size: 20px;\n        font-weight: 600;\n        color: #fff;\n      }\n\n      .details-actions {\n        display: flex;\n        align-items: center;\n        gap: 10px;\n      }\n\n      .close-btn {\n        cursor: pointer;\n        color: var(--text-secondary);\n        font-size: 20px;\n        transition: color 0.2s ease;\n        line-height: 1;\n      }\n\n      .close-btn:hover {\n        color: #fff;\n      }\n\n      /* Unified Badge Style */\n      .badge-pill {\n        padding: 4px 12px;\n        border-radius: 20px;\n        font-size: 11px;\n        font-weight: 600;\n        text-transform: uppercase;\n        border: 1px solid;\n        letter-spacing: 0.5px;\n        white-space: nowrap;\n      }\n\n      .badge-pill.incoming {\n        color: var(--accent-green);\n        border-color: var(--accent-green);\n      }\n\n      .badge-pill.outgoing {\n        color: var(--accent-orange);\n        border-color: var(--accent-orange);\n      }\n\n      .badge-pill.executor {\n        color: var(--accent-green);\n        border-color: var(--accent-green);\n      }\n\n      .badge-pill.actor {\n        color: var(--accent-red);\n        border-color: var(--accent-red);\n        background: repeating-linear-gradient(\n          45deg,\n          transparent,\n          transparent 2px,\n          rgba(255, 123, 114, 0.1) 2px,\n          rgba(255, 123, 114, 0.1) 4px\n        );\n      }\n\n      .badge-pill.blocked {\n        color: var(--accent-red);\n        border-color: var(--accent-red);\n      }\n\n      .details-path-row {\n        color: var(--text-secondary);\n        font-size: 12px;\n        margin-bottom: 20px;\n        font-family: monospace;\n        white-space: nowrap;\n        text-overflow: ellipsis;\n        overflow: hidden;\n        height: 1.2em;\n      }\n\n      .remote-path-copy {\n        cursor: pointer;\n        color: var(--text-secondary);\n        font-size: 12px;\n        font-weight: normal;\n        transition: color 0.2s ease;\n        white-space: nowrap;\n        overflow: hidden;\n        text-overflow: ellipsis;\n        display: block;\n        width: 25%;\n      }\n\n      .remote-path-copy:hover {\n        color: var(--accent-blue);\n      }\n\n      /* Info Grid 2 */\n      .info-grid-2 {\n        display: flex;\n        gap: 20px;\n        margin-bottom: 25px;\n      }\n\n      .info-item-2 h4 {\n        margin: 0 0 6px 0;\n        color: var(--text-secondary);\n        font-size: 12px;\n        font-weight: normal;\n      }\n\n      .info-item-2 div {\n        font-size: 11px;\n        color: var(--text-primary);\n        font-family: monospace;\n      }\n\n      /* Info Grid */\n      .info-grid {\n        display: grid;\n        grid-template-columns: 1fr 1fr;\n        gap: 20px;\n        margin-bottom: 25px;\n      }\n\n      .info-item h4 {\n        margin: 0 0 6px 0;\n        color: var(--text-secondary);\n        font-size: 12px;\n        font-weight: normal;\n      }\n\n      .info-item div {\n        font-size: 14px;\n        color: var(--text-primary);\n        font-family: monospace;\n      }\n\n      .clickable-path {\n        border-bottom: 1px dashed var(--text-secondary);\n        cursor: pointer;\n        transition: color 0.2s, border-color 0.2s;\n      }\n\n      .clickable-path:hover {\n        color: var(--accent-blue);\n        border-color: var(--accent-blue);\n      }\n\n      /* Content Boxes */\n      .content-box {\n        border: 1px solid var(--border-color);\n        border-radius: 8px;\n        padding: 15px;\n        margin-bottom: 20px;\n        position: relative;\n        background-color: rgba(22, 27, 34, 0.5);\n      }\n\n      .box-title {\n        position: absolute;\n        top: -10px;\n        left: 10px;\n        background-color: var(--bg-color);\n        padding: 0 5px;\n        font-size: 11px;\n        color: var(--text-secondary);\n      }\n\n      .caller-header {\n        display: flex;\n        align-items: center;\n        gap: 10px;\n        margin-bottom: 15px;\n      }\n\n      .caller-icon {\n        color: var(--text-secondary);\n        display: flex;\n        align-items: center;\n        justify-content: center;\n      }\n\n      .caller-icon svg {\n        width: 24px;\n        height: 24px;\n      }\n\n      .caller-info {\n        flex: 1;\n        min-width: 0;\n        /* Critical for flex child truncation */\n      }\n\n      .caller-name {\n        color: var(--accent-blue);\n        font-family: monospace;\n        font-size: 14px;\n        margin-bottom: 2px;\n      }\n\n      .caller-source {\n        color: var(--text-secondary);\n        font-size: 11px;\n        font-family: monospace;\n        height: 1.2em;\n        white-space: nowrap;\n        overflow: hidden;\n        text-overflow: ellipsis;\n        display: block;\n      }\n\n      .flags-row {\n        display: flex;\n        gap: 10px;\n        margin-bottom: 10px;\n        align-items: center;\n      }\n\n      .origin-row {\n        font-size: 12px;\n        color: var(--text-primary);\n        font-family: monospace;\n        display: block;\n        white-space: nowrap;\n        height: 1.2em;\n        overflow: hidden;\n        text-overflow: ellipsis;\n        width: 35%;\n      }\n\n      /* Arguments */\n      .args-content {\n        font-family: \"Consolas\", \"Monaco\", monospace;\n        font-size: 12px;\n        white-space: pre-wrap;\n        overflow-x: auto;\n        color: #e0e0e0;\n        max-height: 300px;\n        overflow-y: auto;\n        line-height: 1.5;\n      }\n\n      /* Copy Button with Animation */\n      .copy-icon-btn {\n        position: absolute;\n        top: 10px;\n        right: 10px;\n        background: transparent;\n        border: 1px solid var(--border-color);\n        border-radius: 4px;\n        color: var(--text-secondary);\n        cursor: pointer;\n        width: 28px;\n        height: 28px;\n        display: flex;\n        align-items: center;\n        justify-content: center;\n        transition: all 0.2s;\n        overflow: hidden;\n        /* Ensure check icon doesn't spill out */\n      }\n\n      .copy-icon-btn:hover {\n        border-color: var(
-
+                                    Value = "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>Cobalt - Session Viewer</title>\n    <link\n      rel=\"icon\"\n      type=\"image/png\"\n      href=\"https://cobalt-xil.pages.dev/Assets/Logo.png\"\n    />\n    <style>\n      :root {\n        --bg-color: #0b0b0b;\n        --surface-color: #161b22;\n        --border-color: #30363d;\n        --text-primary: #c9d1d9;\n        --text-secondary: #8b949e;\n        --accent-blue: #58a6ff;\n        --accent-green: #3fb950;\n        --accent-orange: #d29922;\n        --accent-red: #ff7b72;\n        --font-family: \"Inter\", -apple-system, BlinkMacSystemFont, \"Segoe UI\",\n          Helvetica, Arial, sans-serif;\n      }\n\n      body {\n        background-color: var(--bg-color);\n        color: var(--text-primary);\n        font-family: var(--font-family);\n        margin: 0;\n        padding: 0;\n        font-size: 13px;\n        height: 100vh;\n        display: flex;\n        flex-direction: column;\n        overflow: hidden;\n      }\n\n      /* Top Header */\n      .app-header {\n        height: 50px;\n        border-bottom: 1px solid var(--border-color);\n        display: flex;\n        align-items: center;\n        justify-content: space-between;\n        padding: 0 20px;\n        background-color: var(--bg-color);\n        flex-shrink: 0;\n        z-index: 10;\n      }\n\n      .brand {\n        display: flex;\n        align-items: center;\n        gap: 10px;\n        font-size: 16px;\n        font-weight: 600;\n        color: #fff;\n      }\n\n      .brand-icon {\n        width: 20px;\n        height: 20px;\n        background-image: url(\"https://cobalt-xil.pages.dev/Assets/Logo.png\");\n        background-size: contain;\n        background-repeat: no-repeat;\n        background-position: center;\n      }\n\n      .session-container {\n        position: relative;\n        display: flex;\n        flex-direction: column;\n        align-items: flex-end;\n      }\n\n      .session-info {\n        color: var(--text-secondary);\n        font-family: monospace;\n        font-size: 12px;\n        cursor: pointer;\n        padding: 2px 5px;\n        border-radius: 4px;\n        transition: background-color 0.2s ease;\n        user-select: none;\n      }\n\n      .session-info:hover {\n        background-color: #1c2128;\n      }\n\n      .session-id {\n        color: #fff;\n      }\n\n      .session-tooltip {\n        position: absolute;\n        top: 100%;\n        right: 0;\n        background-color: #1c2128;\n        border: 1px solid var(--border-color);\n        border-radius: 6px;\n        padding: 10px;\n        z-index: 100;\n        width: 250px;\n        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);\n        margin-top: 5px;\n        opacity: 0;\n        transform: translateY(-10px);\n        pointer-events: none;\n        visibility: hidden;\n        transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;\n      }\n\n      .session-tooltip::before {\n        content: \"\";\n        position: absolute;\n        top: -10px;\n        left: 0;\n        width: 100%;\n        height: 10px;\n        background: transparent;\n      }\n\n      .session-container:hover .session-tooltip,\n      .session-tooltip.visible {\n        opacity: 1;\n        transform: translateY(0);\n        pointer-events: auto;\n        visibility: visible;\n      }\n\n      .tooltip-row {\n        display: flex;\n        justify-content: space-between;\n        margin-bottom: 5px;\n        font-size: 11px;\n      }\n\n      .tooltip-label {\n        color: var(--text-secondary);\n      }\n\n      .tooltip-value {\n        color: var(--text-primary);\n        font-family: monospace;\n        user-select: text;\n      }\n\n      /* Mobile Responsiveness */\n      @media (max-width: 768px) {\n        .app-header {\n          height: auto;\n          flex-wrap: wrap;\n          padding: 10px;\n          gap: 10px;\n        }\n\n        .brand {\n          font-size: 14px;\n        }\n\n        .session-container {\n          align-items: flex-start;\n          display: none;\n          /* Hide session info on mobile to save space */\n        }\n\n        .trace-toolbar {\n          height: auto;\n          flex-wrap: wrap;\n          padding: 10px;\n          gap: 10px;\n          justify-content: space-between;\n        }\n\n        /* Hide non-essential info on mobile */\n        .trace-toolbar > div:first-child,\n        #statsLabel {\n          display: none;\n        }\n\n        .search-widget {\n          width: 100%;\n          order: 3;\n          margin-top: 5px;\n        }\n\n        .view-toggle {\n          width: 100%;\n          display: flex;\n        }\n\n        .view-btn {\n          flex: 1;\n          text-align: center;\n        }\n\n        .row-list {\n          width: 60vw;\n          /* Use viewport width to prevent runaway expansion */\n        }\n\n        .col-list {\n          width: 60vw;\n          flex: none;\n        }\n\n        .details-panel.visible {\n          position: fixed;\n          top: 0;\n          left: 0;\n          width: 100%;\n          height: 100%;\n          z-index: 1000;\n          border-left: none;\n        }\n\n        .details-header-top {\n          margin-top: 10px;\n        }\n\n        /* Fix Details Header Overflow */\n        .details-title-group {\n          min-width: 0;\n          flex: 1;\n          margin-right: 10px;\n        }\n\n        .details-name-large {\n          white-space: nowrap;\n          overflow: hidden;\n          text-overflow: ellipsis;\n        }\n\n        .details-actions {\n          flex-shrink: 0;\n        }\n\n        /* Allow wrapping for paths on mobile */\n        .details-path-row,\n        .origin-row,\n        .remote-path-copy {\n          white-space: normal !important;\n          word-break: break-all;\n        }\n      }\n\n      /* Scrollbars */\n      ::-webkit-scrollbar {\n        width: 10px;\n        height: 10px;\n      }\n\n      ::-webkit-scrollbar-track {\n        background: #0d1117;\n      }\n\n      ::-webkit-scrollbar-thumb {\n        background: #30363d;\n        border-radius: 5px;\n        border: 2px solid #0d1117;\n      }\n\n      ::-webkit-scrollbar-thumb:hover {\n        background: #8b949e;\n      }\n\n      ::-webkit-scrollbar-corner {\n        background: var(--bg-color);\n      }\n\n      /* Heatmap Styles */\n      .heatmap-container {\n        flex: 1;\n        display: none;\n        flex-direction: column;\n        overflow: hidden;\n        background-color: var(--bg-color);\n        position: relative;\n      }\n\n      .heatmap-container.visible {\n        display: flex;\n      }\n\n      .heatmap-canvas {\n        flex: 1;\n        width: 100%;\n        height: 100%;\n      }\n\n      .view-toggle {\n        display: flex;\n        background: #1c2128;\n        border: 1px solid var(--border-color);\n        border-radius: 4px;\n        overflow: hidden;\n      }\n\n      .view-btn {\n        padding: 4px 12px;\n        font-size: 12px;\n        cursor: pointer;\n        color: var(--text-secondary);\n        background: transparent;\n        border: none;\n        transition: all 0.2s;\n      }\n\n      .view-btn.active {\n        background: var(--accent-blue);\n        color: white;\n      }\n\n      .view-btn:hover:not(.active) {\n        background: #30363d;\n      }\n\n      /* Main Layout */\n      .main-container {\n        display: flex;\n        flex: 1;\n        overflow: hidden;\n      }\n\n      /* Left Panel: Trace View */\n      .trace-panel {\n        flex: 1;\n        display: flex;\n        flex-direction: column;\n        border-right: 1px solid var(--border-color);\n        min-width: 0;\n        overflow: hidden;\n      }\n\n      .trace-toolbar {\n        height: 40px;\n        border-bottom: 1px solid var(--border-color);\n        display: flex;\n        align-items: center;\n        padding: 0 10px;\n        gap: 10px;\n        background-color: var(--bg-color);\n        flex-shrink: 0;\n      }\n\n      .search-widget {\n        display: flex;\n        flex-direction: column;\n        background-color: var(--bg-color);\n        border: 1px solid var(--border-color);\n        border-radius: 6px;\n        width: 320px;\n        position: relative;\n        transition: border-color 0.2s ease, border-radius 0.2s ease;\n        box-sizing: border-box;\n      }\n\n      .search-widget:focus-within {\n        border-color: var(--accent-blue);\n      }\n\n      .search-widget:focus-within > .search-options {\n        border-color: var(--accent-blue);\n      }\n\n      .search-widget.expanded {\n        border-bottom-left-radius: 0;\n        border-bottom-right-radius: 0;\n        border-bottom-color: transparent;\n      }\n\n      .search-row {\n        display: flex;\n        align-items: center;\n        padding: 4px;\n      }\n\n      .search-chevron {\n        cursor: pointer;\n        padding: 2px;\n        color: var(--text-secondary);\n        display: flex;\n        align-items: center;\n        justify-content: center;\n        transition: transform 0.2s ease, color 0.2s ease;\n        width: 20px;\n        height: 20px;\n        border-radius: 4px;\n      }\n\n      .search-chevron:hover {\n        background-color: rgba(255, 255, 255, 0.1);\n        color: var(--text-primary);\n      }\n\n      .search-chevron.expanded {\n        transform: rotate(90deg);\n      }\n\n      .search-input-container {\n        flex: 1;\n        display: flex;\n        align-items: center;\n        margin-left: 4px;\n      }\n\n      .search-input {\n        background: transparent;\n        border: none;\n        color: var(--text-primary);\n        font-size: 12px;\n        width: 100%;\n        outline: none;\n        height: 20px;\n      }\n\n      .search-options {\n        transition: border-color 0.2s ease, border-radius 0.2s ease;\n        display: none;\n        padding: 10px;\n        border: 1px solid var(--border-color);\n        border-top: none;\n        background-color: var(--bg-color);\n        flex-direction: column;\n        gap: 12px;\n        position: absolute;\n        top: 100%;\n        left: -1px;\n        right: -1px;\n        z-index: 100;\n        border-bottom-left-radius: 6px;\n        border-bottom-right-radius: 6px;\n        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);\n        box-sizing: border-box;\n      }\n\n      .search-options.visible {\n        display: flex;\n      }\n\n      .time-range-row {\n        display: flex;\n        align-items: center;\n        gap: 8px;\n        font-size: 11px;\n        color: var(--text-secondary);\n      }\n\n      .filter-options-row {\n        display: flex;\n        flex-wrap: wrap;\n        gap: 8px;\n        padding-top: 8px;\n        border-top: 1px solid var(--border-color);\n      }\n\n      .filter-checkbox-label {\n        display: flex;\n        align-items: center;\n        gap: 4px;\n        font-size: 11px;\n        color: var(--text-secondary);\n        cursor: pointer;\n        user-select: none;\n      }\n\n      .filter-checkbox-label:hover {\n        color: var(--text-primary);\n      }\n\n      .filter-checkbox {\n        accent-color: var(--accent-blue);\n      }\n\n      .time-input-styled {\n        background-color: #161b22;\n        border: 1px solid var(--border-color);\n        color: var(--text-primary);\n        border-radius: 4px;\n        padding: 4px 8px;\n        width: 60px;\n        outline: none;\n        font-size: 11px;\n        transition: border-color 0.2s ease;\n        margin: 0 2px;\n      }\n\n      .time-input-styled:focus {\n        border-color: var(--accent-blue);\n      }\n\n      .unit-select {\n        background-color: #161b22;\n        border: 1px solid var(--border-color);\n        color: var(--text-primary);\n        border-radius: 4px;\n        outline: none;\n        font-size: 11px;\n        padding: 3px 6px;\n        cursor: pointer;\n        transition: border-color 0.2s ease;\n      }\n\n      .unit-select:focus {\n        border-color: var(--accent-blue);\n      }\n\n      .trace-header-row {\n        display: flex;\n        height: 30px;\n        border-bottom: 1px solid var(--border-color);\n        background-color: var(--surface-color);\n        font-size: 11px;\n        color: var(--text-secondary);\n        line-height: 30px;\n        flex-shrink: 0;\n      }\n\n      .col-list {\n        width: 300px;\n        padding-left: 15px;\n        border-right: 1px solid var(--border-color);\n        flex-shrink: 0;\n        z-index: 5;\n        background-color: var(--surface-color);\n        box-sizing: border-box;\n        /* Match row-list */\n      }\n\n      .col-timeline {\n        flex: 1;\n        position: relative;\n        overflow: hidden;\n        min-width: calc(100vw - 300px);\n      }\n\n      .timeline-ruler {\n        position: relative;\n        top: 0;\n        left: 0;\n        height: 100%;\n        pointer-events: none;\n      }\n\n      .tick {\n        position: absolute;\n        top: 0;\n        bottom: 0;\n        border-left: 1px solid #30363d;\n        font-size: 10px;\n        color: #484f58;\n        padding-left: 4px;\n      }\n\n      .trace-rows {\n        flex: 1;\n        overflow: auto;\n        /* Ensure both scrollbars appear */\n        position: relative;\n        contain: strict;\n      }\n\n      .virtual-spacer {\n        position: absolute;\n        top: 0;\n        left: 0;\n        width: 1px;\n      }\n\n      .virtual-content {\n        position: absolute;\n        top: 0;\n        left: 0;\n        width: 100%;\n      }\n\n      .trace-row {\n        display: flex;\n        height: 28px;\n        /* align-items: center;  Removed to allow children to stretch */\n        cursor: pointer;\n        /* border-bottom: 1px solid #1c2128; Moved to children */\n        width: fit-content;\n        min-width: 100%;\n        transition: background-color 0.1s ease;\n        box-sizing: border-box;\n      }\n\n      .trace-row:hover {\n        background-color: #1c2128;\n      }\n\n      .trace-row.selected {\n        background-color: rgba(88, 166, 255, 0.1);\n      }\n\n      .trace-row.hidden {\n        display: none;\n      }\n\n      .trace-row:hover * {\n        background-color: #1c2128;\n      }\n\n      .trace-row.selected * {\n        background-color: #1c2333;\n      }\n\n      .row-list {\n        width: 300px;\n        padding-left: 15px;\n        /* Use box-shadow for sticky border to prevent it from disappearing */\n        box-shadow: 1px 0 0 0 var(--border-color);\n        border-right: none;\n        border-bottom: 1px solid #1c2128;\n        /* Added border here */\n        display: flex;\n        align-items: center;\n        overflow: hidden;\n        flex-shrink: 0;\n        box-sizing: border-box;\n        position: sticky;\n        left: 0;\n        background-color: var(--bg-color);\n        z-index: 2;\n        transition: background-color 0.1s ease;\n        height: 100%;\n      }\n\n      .row-timeline {\n        flex: 1;\n        position: relative;\n        height: 100%;\n        overflow: hidden;\n        border-bottom: 1px solid #1c2128;\n        /* Added border here */\n        box-sizing: border-box;\n        /* Ensure border is inside height */\n      }\n\n      .type-icon {\n        width: 16px;\n        height: 16px;\n        margin-right: 8px;\n        flex-shrink: 0;\n        background-size: contain;\n        background-repeat: no-repeat;\n        background-position: center;\n      }\n\n      .remote-name {\n        white-space: nowrap;\n        overflow: hidden;\n        text-overflow: ellipsis;\n        color: var(--text-primary);\n        font-size: 12px;\n      }\n\n      .timeline-marker {\n        position: absolute;\n        top: 10px;\n        height: 8px;\n        min-width: 4px;\n        border-radius: 4px;\n        opacity: 0.9;\n      }\n\n      .timeline-marker.incoming {\n        background: linear-gradient(90deg, var(--accent-green), #2ea043);\n      }\n\n      .timeline-marker.outgoing {\n        background: linear-gradient(90deg, var(--accent-orange), #b08800);\n      }\n\n      /* Right Panel: Details */\n      .details-panel {\n        width: 0;\n        opacity: 0;\n        background-color: var(--bg-color);\n        border-left: 0 solid var(--border-color);\n        display: flex;\n        flex-direction: column;\n        padding: 0;\n        box-sizing: border-box;\n        overflow-y: auto;\n        overflow-x: hidden;\n        position: relative;\n        flex-shrink: 0;\n        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease,\n          padding 0.3s ease;\n      }\n\n      .details-panel.visible {\n        width: 450px;\n        opacity: 1;\n        padding: 20px;\n        border-left: 1px solid var(--border-color);\n      }\n\n      /* Header */\n      .details-header-top {\n        display: flex;\n        align-items: center;\n        justify-content: space-between;\n        margin-bottom: 10px;\n      }\n\n      .details-title-group {\n        display: flex;\n        align-items: center;\n        gap: 10px;\n      }\n\n      .details-icon-large {\n        width: 32px;\n        height: 32px;\n        background-size: contain;\n        background-repeat: no-repeat;\n        background-position: center;\n      }\n\n      .details-name-large {\n        font-size: 20px;\n        font-weight: 600;\n        color: #fff;\n      }\n\n      .details-actions {\n        display: flex;\n        align-items: center;\n        gap: 10px;\n      }\n\n      .close-btn {\n        cursor: pointer;\n        color: var(--text-secondary);\n        font-size: 20px;\n        transition: color 0.2s ease;\n        line-height: 1;\n      }\n\n      .close-btn:hover {\n        color: #fff;\n      }\n\n      /* Unified Badge Style */\n      .badge-pill {\n        padding: 4px 12px;\n        border-radius: 20px;\n        font-size: 11px;\n        font-weight: 600;\n        text-transform: uppercase;\n        border: 1px solid;\n        letter-spacing: 0.5px;\n        white-space: nowrap;\n      }\n\n      .badge-pill.incoming {\n        color: var(--accent-green);\n        border-color: var(--accent-green);\n      }\n\n      .badge-pill.outgoing {\n        color: var(--accent-orange);\n        border-color: var(--accent-orange);\n      }\n\n      .badge-pill.executor {\n        color: var(--accent-green);\n        border-color: var(--accent-green);\n      }\n\n      .badge-pill.actor {\n        color: var(--accent-red);\n        border-color: var(--accent-red);\n        background: repeating-linear-gradient(\n          45deg,\n          transparent,\n          transparent 2px,\n          rgba(255, 123, 114, 0.1) 2px,\n          rgba(255, 123, 114, 0.1) 4px\n        );\n      }\n\n      .badge-pill.blocked {\n        color: var(--accent-red);\n        border-color: var(--accent-red);\n      }\n\n      .details-path-row {\n        color: var(--text-secondary);\n        font-size: 12px;\n        margin-bottom: 20px;\n        font-family: monospace;\n        white-space: nowrap;\n        text-overflow: ellipsis;\n        overflow: hidden;\n        height: 1.2em;\n      }\n\n      .remote-path-copy {\n        cursor: pointer;\n        color: var(--text-secondary);\n        font-size: 12px;\n        font-weight: normal;\n        transition: color 0.2s ease;\n        white-space: nowrap;\n        overflow: hidden;\n        text-overflow: ellipsis;\n        display: block;\n        width: 25%;\n      }\n\n      .remote-path-copy:hover {\n        color: var(--accent-blue);\n      }\n\n      /* Info Grid 2 */\n      .info-grid-2 {\n        display: flex;\n        gap: 20px;\n        margin-bottom: 25px;\n      }\n\n      .info-item-2 h4 {\n        margin: 0 0 6px 0;\n        color: var(--text-secondary);\n        font-size: 12px;\n        font-weight: normal;\n      }\n\n      .info-item-2 div {\n        font-size: 11px;\n        color: var(--text-primary);\n        font-family: monospace;\n      }\n\n      /* Info Grid */\n      .info-grid {\n        display: grid;\n        grid-template-columns: 1fr 1fr;\n        gap: 20px;\n        margin-bottom: 25px;\n      }\n\n      .info-item h4 {\n        margin: 0 0 6px 0;\n        color: var(--text-secondary);\n        font-size: 12px;\n        font-weight: normal;\n      }\n\n      .info-item div {\n        font-size: 14px;\n        color: var(--text-primary);\n        font-family: monospace;\n      }\n\n      .clickable-path {\n        border-bottom: 1px dashed var(--text-secondary);\n        cursor: pointer;\n        transition: color 0.2s, border-color 0.2s;\n      }\n\n      .clickable-path:hover {\n        color: var(--accent-blue);\n        border-color: var(--accent-blue);\n      }\n\n      /* Content Boxes */\n      .content-box {\n        border: 1px solid var(--border-color);\n        border-radius: 8px;\n        padding: 15px;\n        margin-bottom: 20px;\n        position: relative;\n        background-color: rgba(22, 27, 34, 0.5);\n      }\n\n      .box-title {\n        position: absolute;\n        top: -10px;\n        left: 10px;\n        background-color: var(--bg-color);\n        padding: 0 5px;\n        font-size: 11px;\n        color: var(--text-secondary);\n      }\n\n      .caller-header {\n        display: flex;\n        align-items: center;\n        gap: 10px;\n        margin-bottom: 15px;\n      }\n\n      .caller-icon {\n        color: var(--text-secondary);\n        display: flex;\n        align-items: center;\n        justify-content: center;\n      }\n\n      .caller-icon svg {\n        width: 24px;\n        height: 24px;\n      }\n\n      .caller-info {\n        flex: 1;\n        min-width: 0;\n        /* Critical for flex child truncation */\n      }\n\n      .caller-name {\n        color: var(--accent-blue);\n        font-family: monospace;\n        font-size: 14px;\n        margin-bottom: 2px;\n      }\n\n      .caller-source {\n        color: var(--text-secondary);\n        font-size: 11px;\n        font-family: monospace;\n        height: 1.2em;\n        white-space: nowrap;\n        overflow: hidden;\n        text-overflow: ellipsis;\n        display: block;\n      }\n\n      .flags-row {\n        display: flex;\n        gap: 10px;\n        margin-bottom: 10px;\n        align-items: center;\n      }\n\n      .origin-row {\n        font-size: 12px;\n        color: var(--text-primary);\n        font-family: monospace;\n        display: block;\n        white-space: nowrap;\n        height: 1.2em;\n        overflow: hidden;\n        text-overflow: ellipsis;\n        width: 35%;\n      }\n\n      /* Arguments */\n      .args-content {\n        font-family: \"Consolas\", \"Monaco\", monospace;\n        font-size: 12px;\n        white-space: pre-wrap;\n        overflow-x: auto;\n        color: #e0e0e0;\n        max-height: 300px;\n        overflow-y: auto;\n        line-height: 1.5;\n      }\n\n      /* Copy Button with Animation */\n      .copy-icon-btn {\n        position: absolute;\n        top: 10px;\n        right: 10px;\n        background: transparent;\n        border: 1px solid var(--border-color);\n        border-radius: 4px;\n        color: var(--text-secondary);\n        cursor: pointer;\n        width: 28px;\n        height: 28px;\n        display: flex;\n        align-items: center;\n        justify-content: center;\n        transition: all 0.2s;\n        overflow: hidden;\n        /* Ensure check icon doesn't spill out */\n      }\n\n      .copy-icon-btn:hover {\n        border-color: var(--text-primary);\n        color: var(--text-primary);\n        background-color: var(--surface-color);\n      }\n\n      .copy-icon-btn svg {\n        width: 14px;\n        height: 14px;\n        position: absolute;\n        top: 50%;\n        left: 50%;\n        transform: translate(-50%, -50%) scale(1);\n        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);\n      }\n\n      .copy-icon-btn .icon-check {\n        transform: translate(-50%, -50%) scale(0);\n        color: var(--accent-green);\n      }\n\n      .copy-icon-btn.copied .icon-copy {\n        transform: translate(-50%, -50%) scale(0);\n      }\n\n      .copy-icon-btn.copied .icon-check {\n        transform: translate(-50%, -50%) scale(1);\n      }\n\n      /* Dropdown */\n      .dropdown-menu {\n        position: absolute;\n        top: 42px;\n        /* Button height + spacing */\n        right: 10px;\n        background-color: #1c2128;\n        border: 1px solid var(--border-color);\n        border-radius: 6px;\n        width: 160px;\n        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);\n        z-index: 50;\n        display: none;\n        overflow: hidden;\n      }\n\n      .dropdown-menu.visible {\n        display: block;\n      }\n\n      .dropdown-item {\n        padding: 8px 12px;\n        font-size: 12px;\n        color: var(--text-primary);\n        cursor: pointer;\n        transition: background-color 0.2s;\n        display: flex;\n        align-items: center;\n        gap: 8px;\n      }\n\n      .dropdown-item:hover {\n        background-color: var(--accent-blue);\n        color: #fff;\n      }\n\n      .dropdown-item svg {\n        width: 14px;\n        height: 14px;\n        opacity: 0.7;\n      }\n\n      /* Toast Notification */\n      .toast-container {\n        position: fixed;\n        bottom: 30px;\n        left: 50%;\n        transform: translateX(-50%) translateY(20px);\n        background-color: #1c2128;\n        border: 1px solid var(--border-color);\n        border-radius: 6px;\n        padding: 8px 16px;\n        color: #fff;\n        font-size: 12px;\n        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);\n        opacity: 0;\n        transition: opacity 0.3s, transform 0.3s;\n        pointer-events: none;\n        z-index: 1000;\n        display: flex;\n        align-items: center;\n        gap: 8px;\n      }\n\n      .toast-container.visible {\n        opacity: 1;\n        transform: translateX(-50%) translateY(0);\n      }\n\n      .toast-container svg {\n        width: 16px;\n        height: 16px;\n        color: var(--accent-green);\n      }\n\n      /* Syntax Highlighting */\n      .hl-str {\n        color: #a5d6ff;\n      }\n\n      .hl-num {\n        color: #79c0ff;\n      }\n\n      .hl-bool {\n        color: #ff7b72;\n      }\n\n      .hl-key {\n        color: #7ee787;\n      }\n\n      .hl-nil {\n        color: #ff7b72;\n      }\n\n      .footer {\n        height: 25px;\n        border-top: 1px solid var(--border-color);\n        display: flex;\n        align-items: center;\n        justify-content: space-between;\n        padding: 0 20px;\n        background-color: var(--bg-color);\n        color: var(--text-secondary);\n        font-size: 11px;\n        flex-shrink: 0;\n      }\n    </style>\n  </head>\n\n  <body>\n    <div class=\"app-header\">\n      <a\n        href=\"https://github.com/notpoiu/cobalt/tree/main\"\n        target=\"_blank\"\n        style=\"text-decoration: none\"\n      >\n        <div class=\"brand\">\n          <div class=\"brand-icon\"></div>\n          Cobalt - Session Viewer\n        </div>\n      </a>\n      <div class=\"session-container\">\n        <div class=\"session-info\">\n          Session / <span class=\"session-id\">{{SESSION_ID}}</span>\n        </div>\n        <div class=\"session-tooltip\">\n          <div class=\"tooltip-row\">\n            <span class=\"tooltip-label\">Start Time (tick)</span>\n            <span class=\"tooltip-value\">{{START_TIME}}</span>\n          </div>\n          <div class=\"tooltip-row\">\n            <span class=\"tooltip-label\">Place ID</span>\n            <span class=\"tooltip-value\">{{PLACE_ID}}</span>\n          </div>\n          <div class=\"tooltip-row\">\n            <span class=\"tooltip-label\">Job ID</span>\n            <span class=\"tooltip-value\">{{JOB_ID}}</span>\n          </div>\n        </div>\n      </div>\n    </div>\n\n    <div class=\"main-container\">\n      <!-- LEFT PANEL WRAPPER -->\n      <div\n        class=\"left-panel-wrapper\"\n        style=\"\n          flex: 1;\n          display: flex;\n          flex-direction: column;\n          border-right: 1px solid var(--border-color);\n          min-width: 0;\n          overflow: hidden;\n        \"\n      >\n        <!-- SHARED TOOLBAR -->\n        <div class=\"trace-toolbar\">\n          <div\n            style=\"\n              font-size: 11px;\n              color: var(--text-secondary);\n              margin-right: 20px;\n            \"\n          >\n            Started: {{DATE}}\n          </div>\n          <div style=\"flex: 1\"></div>\n          <div class=\"view-toggle\">\n            <button class=\"view-btn active\" onclick=\"switchView('timeline')\">\n              Timeline\n            </button>\n            <button class=\"view-btn\" onclick=\"switchView('heatmap')\">\n              Heatmap\n            </button>\n          </div>\n          <div class=\"divider\"></div>\n          <div class=\"search-widget\">\n            <div class=\"search-row\">\n              <div\n                class=\"search-chevron\"\n                onclick=\"toggleSearchOptions()\"\n                id=\"searchChevron\"\n              >\n                <svg\n                  width=\"16\"\n                  height=\"16\"\n                  viewBox=\"0 0 16 16\"\n                  fill=\"currentColor\"\n                >\n                  <path\n                    d=\"M6 4l4 4-4 4\"\n                    stroke=\"currentColor\"\n                    stroke-width=\"1.5\"\n                    fill=\"none\"\n                  />\n                </svg>\n              </div>\n              <div class=\"search-input-container\">\n                <input\n                  type=\"text\"\n                  class=\"search-input\"\n                  id=\"filterInput\"\n                  placeholder=\"Filter events...\"\n                  oninput=\"handleFilterInput()\"\n                />\n              </div>\n            </div>\n            <div class=\"search-options\" id=\"searchOptions\">\n              <div class=\"time-range-row\">\n                <span>Time Range:</span>\n                <input\n                  type=\"number\"\n                  class=\"time-input-styled\"\n                  id=\"minTimeInput\"\n                  placeholder=\"Start\"\n                  oninput=\"handleTimeInput()\"\n                />\n                <span>-</span>\n                <input\n                  type=\"number\"\n                  class=\"time-input-styled\"\n                  id=\"maxTimeInput\"\n                  placeholder=\"End\"\n                  oninput=\"handleTimeInput()\"\n                />\n                <select\n                  class=\"unit-select\"\n                  id=\"timeUnitSelect\"\n                  onchange=\"handleTimeInput()\"\n                >\n                  <option value=\"1\">s</option>\n                  <option value=\"0.001\">ms</option>\n                </select>\n              </div>\n              <div class=\"filter-options-row\">\n                <label class=\"filter-checkbox-label\"\n                  ><input\n                    type=\"checkbox\"\n                    class=\"filter-checkbox\"\n                    id=\"filterIncoming\"\n                    onchange=\"handleFilterInput()\"\n                  />\n                  Incoming</label\n                >\n                <label class=\"filter-checkbox-label\"\n                  ><input\n                    type=\"checkbox\"\n                    class=\"filter-checkbox\"\n                    id=\"filterOutgoing\"\n                    onchange=\"handleFilterInput()\"\n                  />\n                  Outgoing</label\n                >\n                <div\n                  style=\"\n                    width: 1px;\n                    height: 14px;\n                    background: var(--border-color);\n                    margin: 0 4px;\n                  \"\n                ></div>\n                <label class=\"filter-checkbox-label\"\n                  ><input\n                    type=\"checkbox\"\n                    class=\"filter-checkbox\"\n                    id=\"filterActor\"\n                    onchange=\"handleFilterInput()\"\n                  />\n                  Actor</label\n                >\n                <label class=\"filter-checkbox-label\"\n                  ><input\n                    type=\"checkbox\"\n                    class=\"filter-checkbox\"\n                    id=\"filterNonActor\"\n                    onchange=\"handleFilterInput()\"\n                  />\n                  Non-Actor</label\n                >\n                <div\n                  style=\"\n                    width: 1px;\n                    height: 14px;\n                    background: var(--border-color);\n                    margin: 0 4px;\n                  \"\n                ></div>\n                <label class=\"filter-checkbox-label\"\n                  ><input\n                    type=\"checkbox\"\n                    class=\"filter-checkbox\"\n                    id=\"filterArgs\"\n                    onchange=\"handleFilterInput()\"\n                  />\n                  Args</label\n                >\n                <label class=\"filter-checkbox-label\"\n                  ><input\n                    type=\"checkbox\"\n                    class=\"filter-checkbox\"\n                    id=\"filterProto\"\n                    onchange=\"handleFilterInput()\"\n                  />\n                  Proto</label\n                >\n                <label class=\"filter-checkbox-label\"\n                  ><input\n                    type=\"checkbox\"\n                    class=\"filter-checkbox\"\n                    id=\"filterConst\"\n                    onchange=\"handleFilterInput()\"\n                  />\n                  Const</label\n                >\n                <label class=\"filter-checkbox-label\"\n                  ><input\n                    type=\"checkbox\"\n                    class=\"filter-checkbox\"\n                    id=\"filterHash\"\n                    onchange=\"handleFilterInput()\"\n                  />\n                  Hash</label\n                >\n                <label class=\"filter-checkbox-label\"\n                  ><input\n                    type=\"checkbox\"\n                    class=\"filter-checkbox\"\n                    id=\"filterSource\"\n                    onchange=\"handleFilterInput()\"\n                  />\n                  Source</label\n                >\n              </div>\n            </div>\n          </div>\n        </div>\n\n        <!-- TIMELINE VIEW -->\n        <div class=\"trace-panel\" id=\"timelinePanel\" style=\"border-right: none\">\n          <div class=\"trace-header-row\">\n            <div class=\"col-list\">Remote</div>\n            <div class=\"col-timeline\" id=\"timelineHeader\">\n              <div class=\"timeline-ruler\" id=\"ruler\"></div>\n            </div>\n          </div>\n\n          <div class=\"trace-rows\" id=\"rowsContainer\">\n            <div id=\"virtualSpacer\" class=\"virtual-spacer\"></div>\n            <div id=\"virtualContent\" class=\"virtual-content\"></div>\n          </div>\n        </div>\n\n        <!-- HEATMAP VIEW -->\n        <div class=\"heatmap-container\" id=\"heatmapPanel\">\n          <div\n            id=\"heatmapScroll\"\n            style=\"\n              width: 100%;\n              height: 100%;\n              overflow-x: auto;\n              overflow-y: hidden;\n              position: relative;\n            \"\n          >\n            <div\n              id=\"heatmapSpacer\"\n              style=\"\n                height: 1px;\n                width: 100%;\n                position: absolute;\n                top: 0;\n                left: 0;\n                pointer-events: none;\n              \"\n            ></div>\n            <canvas\n              id=\"heatmapCanvas\"\n              class=\"heatmap-canvas\"\n              style=\"\n                position: sticky;\n                left: 0;\n                top: 0;\n                width: 100%;\n                height: 100%;\n              \"\n            ></canvas>\n          </div>\n          <div\n            id=\"heatmapTooltip\"\n            class=\"heatmap-tooltip\"\n            style=\"\n              display: none;\n              position: absolute;\n              background: #1c2128;\n              border: 1px solid #30363d;\n              padding: 4px 8px;\n              border-radius: 4px;\n              font-size: 11px;\n              color: #c9d1d9;\n              pointer-events: none;\n              z-index: 100;\n            \"\n          ></div>\n        </div>\n      </div>\n\n      <!-- RIGHT PANEL -->\n      <div class=\"details-panel\" id=\"detailsPanel\">\n        <div id=\"detailsContent\"></div>\n      </div>\n    </div>\n\n    <div class=\"footer\">\n      <div>Ended: {{END_DATE}}</div>\n      <span\n        id=\"statsLabel\"\n        style=\"\n          color: var(--text-secondary);\n          font-size: 11px;\n          margin-right: 10px;\n        \"\n      >\n        {{EVENT_COUNT}} Events \226\128\162 {{TOTAL_DURATION}}s\n      </span>\n    </div>\n\n    <!-- Toast Notification -->\n    <div id=\"toast\" class=\"toast-container\">\n      <svg\n        xmlns=\"http://www.w3.org/2000/svg\"\n        width=\"24\"\n        height=\"24\"\n        viewBox=\"0 0 24 24\"\n        fill=\"none\"\n        stroke=\"currentColor\"\n        stroke-width=\"2\"\n        stroke-linecap=\"round\"\n        stroke-linejoin=\"round\"\n        class=\"lucide lucide-check\"\n      >\n        <path d=\"M20 6 9 17l-5-5\" />\n      </svg>\n      <span id=\"toastMessage\">Copied to clipboard</span>\n    </div>\n\n    <!-- Data Script -->\n    <script type=\"application/json\" id=\"dictionary-data\">\n      {{DICTIONARY_JSON}}\n    </script>\n    <script type=\"application/json\" id=\"event-data\">\n      {{EVENTS_JSON}}\n    </script>\n\n    <script>\n      // Data Parsing\n      let startTime = {{START_TIME}}; // Seconds\n      const totalDuration = {{DURATION}};\n      const dictionary = JSON.parse(document.getElementById('dictionary-data').textContent);\n      const rawEvents = JSON.parse(document.getElementById('event-data').textContent);\n\n      // Reconstruct Events\n      const allEvents = rawEvents.map(e => ({\n        name: dictionary[e[0]],\n        className: dictionary[e[1]],\n        path: dictionary[e[2]],\n        type: dictionary[e[3]],\n        timestamp: e[4],\n        origin: dictionary[e[5]],\n\n        args: dictionary[e[6]],\n        method: dictionary[e[7]],\n\n        funcName: dictionary[e[8]],\n        funcLine: e[9],\n        funcSource: dictionary[e[10]],\n        isExecutor: e[11] === 1,\n        isActor: e[12] === 1,\n\n        funcHash: dictionary[e[13]],\n        upvalues: dictionary[e[14]],\n        protos: dictionary[e[15]],\n        constants: dictionary[e[16]],\n        isBlocked: e[17] === 1\n      }));\n\n      if (allEvents.length > 0) {\n        const minTimestamp = Math.min(...allEvents.map(e => e.timestamp));\n        if (minTimestamp < startTime) {\n          startTime = minTimestamp;\n        }\n      }\n\n      // Preprocess events\n      allEvents.forEach(evt => {\n        evt.relTime = Math.max(0, evt.timestamp - startTime);\n\n        const typeLower = evt.type.toLowerCase();\n        const methodLower = evt.method ? evt.method.toLowerCase() : '';\n\n        if (methodLower.includes('client') || typeLower.includes('client')) {\n          evt.typeClass = 'incoming';\n        } else {\n          evt.typeClass = 'outgoing';\n        }\n      });\n\n      // State\n      let filteredEvents = allEvents;\n      let zoomLevel = 1;\n      let selectedEvent = null;\n      let filterTimeout = null;\n      let filterMinTime = 0;\n      let filterMaxTime = totalDuration;\n\n      // Initialize Time Inputs\n      document.getElementById('minTimeInput').value = \"0\";\n      document.getElementById('maxTimeInput').value = totalDuration.toFixed(2);\n\n      // Virtual Scroll State\n      let lastStartIndex = -1;\n      let lastEndIndex = -1;\n      let isScrolling = false;\n\n      // DOM Elements\n      const rowsContainer = document.getElementById('rowsContainer');\n      const virtualSpacer = document.getElementById('virtualSpacer');\n      const virtualContent = document.getElementById('virtualContent');\n      const rulerContainer = document.getElementById('ruler');\n      const detailsPanel = document.getElementById('detailsPanel');\n      const detailsContent = document.getElementById('detailsContent');\n      const timelineHeader = document.getElementById('timelineHeader');\n      const statsLabel = document.getElementById('statsLabel');\n\n\n      // Heatmap State\n      let currentView = 'timeline';\n      let heatmapZoom = 1;\n      let detailsWasVisible = false;\n      const heatmapCanvas = document.getElementById('heatmapCanvas');\n      const heatmapTooltip = document.getElementById('heatmapTooltip');\n\n      const timelinePanel = document.getElementById('timelinePanel');\n      const heatmapPanel = document.getElementById('heatmapPanel');\n\n      // Heatmap Interaction\n      heatmapCanvas.addEventListener('wheel', (e) => {\n        if (currentView !== 'heatmap') return;\n        e.preventDefault();\n\n        const delta = e.deltaY > 0 ? 1.1 : 0.9;\n        heatmapZoom = Math.max(1, Math.min(50, heatmapZoom * delta));\n        renderHeatmap();\n      }, { passive: false });\n\n      heatmapCanvas.addEventListener('mousemove', (e) => {\n        if (currentView !== 'heatmap') return;\n        const rect = heatmapCanvas.getBoundingClientRect();\n        const x = e.clientX - rect.left;\n        const y = e.clientY - rect.top;\n\n        if (!window.lastHeatmapData) return;\n\n        const { sortedRemotes, rowHeight, binWidth, remotes, maxBinCount, timeBins, binDuration, margin, scrollLeft } = window.lastHeatmapData;\n        const width = heatmapPanel.clientWidth;\n        const height = heatmapPanel.clientHeight;\n\n        if (x < margin.left || x > width - margin.right || y < margin.top || y > height - margin.bottom) {\n          heatmapTooltip.style.display = 'none';\n          return;\n        }\n\n        const rowIndex = Math.floor((y - margin.top) / rowHeight);\n\n        // Calculate colIndex based on virtual position (x + scrollLeft)\n        const colIndex = Math.floor((x - margin.left + scrollLeft) / binWidth);\n\n        if (rowIndex >= 0 && rowIndex < sortedRemotes.length && colIndex >= 0 && colIndex < timeBins) {\n          const remote = sortedRemotes[rowIndex];\n          // Calculate count for this bin\n          let count = 0;\n          remotes[remote].forEach(evt => {\n            const binIndex = Math.min(Math.floor(evt.relTime / binDuration), timeBins - 1);\n            if (binIndex === colIndex) count++;\n          });\n\n          heatmapTooltip.style.display = 'block';\n          heatmapTooltip.innerHTML = `<b>${remote}</b><br>Time: ${(colIndex * binDuration).toFixed(1)}s<br>Count: ${count}`;\n\n          const tooltipWidth = heatmapTooltip.offsetWidth;\n          const panelWidth = heatmapPanel.clientWidth;\n\n          let leftPos = x + 10;\n          if (leftPos + tooltipWidth > panelWidth - 10) {\n            leftPos = x - tooltipWidth - 10;\n          }\n\n          heatmapTooltip.style.left = leftPos + 'px';\n          heatmapTooltip.style.top = (y + 10) + 'px';\n        } else {\n          heatmapTooltip.style.display = 'none';\n        }\n      });\n\n      heatmapCanvas.addEventListener('mouseleave', () => {\n        heatmapTooltip.style.display = 'none';\n      });\n\n      document.getElementById('heatmapScroll').addEventListener('scroll', () => {\n        if (currentView === 'heatmap') {\n          renderHeatmap();\n        }\n      });\n\n      function switchView(view) {\n        currentView = view;\n        document.querySelectorAll('.view-btn').forEach(btn => {\n          btn.classList.toggle('active', btn.innerText.toLowerCase() === view);\n        });\n\n        if (view === 'timeline') {\n          timelinePanel.style.display = 'flex';\n          heatmapPanel.classList.remove('visible');\n\n          if (detailsWasVisible) {\n            detailsPanel.classList.add('visible');\n          }\n\n          renderVirtualRows(true);\n        } else {\n          if (detailsPanel.classList.contains('visible')) {\n            detailsWasVisible = true;\n            detailsPanel.classList.remove('visible');\n          } else {\n            detailsWasVisible = false;\n          }\n\n          timelinePanel.style.display = 'none';\n          heatmapPanel.classList.add('visible');\n          renderHeatmap();\n        }\n      }\n\n      function renderHeatmap() {\n        const ctx = heatmapCanvas.getContext('2d');\n        const containerWidth = heatmapPanel.clientWidth;\n        const height = heatmapPanel.clientHeight;\n        const scrollLeft = document.getElementById('heatmapScroll').scrollLeft;\n\n        // Calculate total virtual width\n        const totalWidth = containerWidth * heatmapZoom;\n\n        // Update Spacer\n        document.getElementById('heatmapSpacer').style.width = totalWidth + 'px';\n\n        const dpr = window.devicePixelRatio || 1;\n\n        // Canvas is always viewport size\n        heatmapCanvas.width = containerWidth * dpr;\n        heatmapCanvas.height = height * dpr;\n        ctx.scale(dpr, dpr);\n\n        ctx.fillStyle = '#0d1117';\n        ctx.fillRect(0, 0, containerWidth, height);\n\n        if (filteredEvents.length === 0) return;\n\n        const remotes = {};\n        filteredEvents.forEach(evt => {\n          if (!remotes[evt.name]) remotes[evt.name] = [];\n          remotes[evt.name].push(evt);\n        });\n\n        const sortedRemotes = Object.keys(remotes).sort((a, b) => remotes[b].length - remotes[a].length);\n\n        const margin = { top: 30, right: 20, bottom: 20, left: 150 };\n\n        // Virtual chart width\n        const chartWidth = totalWidth - margin.left - margin.right;\n        const chartHeight = height - margin.top - margin.bottom;\n\n        // Apply Zoom to time bins\n        const timeBins = Math.floor(100 * heatmapZoom);\n        const binWidth = chartWidth / timeBins;\n        const binDuration = totalDuration / timeBins;\n\n        // Adjust row height to fit\n        const rowHeight = Math.min(30, chartHeight / sortedRemotes.length);\n\n        // Store data for tooltip (adjusted for virtual scroll)\n        window.lastHeatmapData = { sortedRemotes, rowHeight, binWidth, remotes, timeBins, binDuration, margin, scrollLeft };\n\n        ctx.strokeStyle = '#30363d';\n        ctx.lineWidth = 1;\n\n        ctx.font = '11px -apple-system, BlinkMacSystemFont, \"Segoe UI\", Helvetica, Arial, sans-serif';\n        ctx.textAlign = 'right';\n        ctx.textBaseline = 'middle';\n\n        let maxBinCount = 0;\n        sortedRemotes.forEach(remote => {\n          const bins = new Array(timeBins).fill(0);\n          remotes[remote].forEach(evt => {\n            const binIndex = Math.min(Math.floor(evt.relTime / binDuration), timeBins - 1);\n            bins[binIndex]++;\n          });\n          maxBinCount = Math.max(maxBinCount, ...bins);\n        });\n\n        // Update Legend Labels\n        window.lastHeatmapData.maxBinCount = maxBinCount;\n        window.lastHeatmapData.maxBinCount = maxBinCount;\n\n        sortedRemotes.forEach((remote, i) => {\n          const y = margin.top + (i * rowHeight);\n\n          // Draw Label (Fixed position)\n          ctx.fillStyle = '#8b949e';\n          ctx.fillText(remote.length > 20 ? remote.slice(0, 18) + '...' : remote, margin.left - 10, y + rowHeight / 2);\n\n          // Draw Line\n          ctx.beginPath();\n          ctx.moveTo(margin.left, y);\n          ctx.lineTo(containerWidth - margin.right, y);\n          ctx.stroke();\n\n          const bins = new Array(timeBins).fill(0);\n          remotes[remote].forEach(evt => {\n            const binIndex = Math.min(Math.floor(evt.relTime / binDuration), timeBins - 1);\n            bins[binIndex]++;\n          });\n\n          bins.forEach((count, binIndex) => {\n            if (count === 0) return;\n\n            // Calculate virtual X\n            const virtualX = margin.left + (binIndex * binWidth);\n\n            // Apply scroll offset\n            const screenX = virtualX - scrollLeft;\n\n            // Only draw if visible\n            if (screenX + binWidth < margin.left || screenX > containerWidth - margin.right) return;\n\n            // Clamp to chart area\n            const drawX = Math.max(margin.left, screenX);\n            const drawWidth = Math.min(binWidth, (containerWidth - margin.right) - drawX);\n\n            const intensity = count / maxBinCount;\n            const hue = (1 - intensity) * 240;\n            ctx.fillStyle = `hsla(${hue}, 70%, 50%, 0.8)`;\n\n            ctx.fillRect(drawX, y + 2, drawWidth - 1, rowHeight - 4);\n          });\n        });\n\n        ctx.fillStyle = '#8b949e';\n        ctx.textAlign = 'center';\n        ctx.textBaseline = 'top';\n\n        const numTicks = 5 * Math.ceil(heatmapZoom);\n\n        for (let i = 0; i <= numTicks; i++) {\n          const virtualX = margin.left + (chartWidth * (i / numTicks));\n          const screenX = virtualX - scrollLeft;\n\n          if (screenX < margin.left || screenX > containerWidth - margin.right) continue;\n\n          const time = (totalDuration * (i / numTicks)).toFixed(1) + 's';\n          ctx.fillText(time, screenX, margin.top - 20);\n\n          ctx.beginPath();\n          ctx.moveTo(screenX, margin.top);\n          ctx.lineTo(screenX, height - margin.bottom);\n          ctx.stroke();\n        }\n      }\n\n      // Resize observer for heatmap\n      new ResizeObserver(() => {\n        if (currentView === 'heatmap' && heatmapPanel.classList.contains('visible')) {\n          renderHeatmap();\n        }\n      }).observe(heatmapPanel);\n\n      // Window resize handler for timeline\n      window.addEventListener('resize', () => {\n        if (currentView === 'timeline') {\n          renderVirtualRows(true);\n          renderRuler();\n        }\n      });\n\n      // Virtual Scroll Config\n      const ROW_HEIGHT = 29; // 28px + 1px border\n      const BUFFER_SIZE = 5;\n\n      function formatTime(seconds) {\n        if (seconds < 1) return (seconds * 1000).toFixed(1) + 'ms';\n        return seconds.toFixed(2) + 's';\n      }\n\n      function formatAbsTime(timestamp) {\n        const date = new Date(timestamp * 1000);\n        return date.toLocaleTimeString();\n      }\n\n      function getIconUrl(className) {\n        return `https://robloxapi.github.io/ref/icons/dark/${className}.png`;\n      }\n\n      function escapeHtml(text) {\n        if (!text) return '';\n        return text\n          .replace(/&/g, \"&amp;\")\n          .replace(/</g, \"&lt;\")\n          .replace(/>/g, \"&gt;\")\n          .replace(/\"/g, \"&quot;\")\n          .replace(/'/g, \"&#039;\");\n      }\n\n      function syntaxHighlight(text) {\n        if (!text) return '';\n\n        text = escapeHtml(text);\n        return text\n          .replace(/&quot;((?:[^&]|&(?!(quot;)))*)&quot;/g, '<span class=\"hl-str\">\"$1\"</span>')\n          .replace(/\\b(\\d+(\\.\\d+)?)\\b/g, '<span class=\"hl-num\">$1</span>')\n          .replace(/\\b(true|false)\\b/g, '<span class=\"hl-bool\">$1</span>')\n          .replace(/\\b(nil)\\b/g, '<span class=\"hl-nil\">$1</span>');\n      }\n\n      // Toast Logic\n      function showToast(message) {\n        const toast = document.getElementById('toast');\n        const msgSpan = document.getElementById('toastMessage');\n        msgSpan.innerText = message;\n        toast.classList.add('visible');\n        setTimeout(() => {\n          toast.classList.remove('visible');\n        }, 2000);\n      }\n\n      function copyText(text, message = \"Copied to clipboard\") {\n        navigator.clipboard.writeText(text).then(() => {\n          showToast(message);\n        });\n      }\n\n      function copyArgs(btn) {\n        if (selectedEvent) {\n          navigator.clipboard.writeText(selectedEvent.args).then(() => {\n            btn.classList.add('copied');\n            setTimeout(() => btn.classList.remove('copied'), 2000);\n          });\n        }\n      }\n\n      function toggleCallerDropdown(e) {\n        e.stopPropagation();\n        const menu = document.getElementById('callerDropdown');\n        if (menu) {\n          menu.classList.toggle('visible');\n        }\n      }\n\n      function copyCallerData(type) {\n        if (!selectedEvent) return;\n        let text = \"\";\n        let msg = \"Copied to clipboard\";\n        switch (type) {\n          case 'hash':\n            text = selectedEvent.funcHash || \"N/A\";\n            msg = \"Function Hash copied\";\n            break;\n          case 'upvalues':\n            text = selectedEvent.upvalues || \"{}\";\n            msg = \"Upvalues copied\";\n            break;\n          case 'protos':\n            text = selectedEvent.protos || \"[]\";\n            msg = \"Protos copied\";\n            break;\n          case 'path':\n            text = selectedEvent.origin || \"N/A\";\n            msg = \"Script Path copied\";\n            break;\n          case 'source':\n            text = selectedEvent.funcSource || \"N/A\";\n            msg = \"Source copied\";\n            break;\n        }\n        copyText(text, msg);\n        document.getElementById('callerDropdown').classList.remove('visible');\n      }\n\n      // Render Ruler\n      function renderRuler() {\n        rulerContainer.innerHTML = '';\n        const tickCount = Math.max(5, Math.floor(5 * zoomLevel));\n        for (let i = 0; i <= tickCount; i++) {\n          const pct = (i / tickCount) * 100;\n          const time = (totalDuration * (i / tickCount));\n          const tick = document.createElement('div');\n          tick.className = 'tick';\n          tick.style.left = pct + '%';\n          tick.innerText = formatTime(time);\n          rulerContainer.appendChild(tick);\n        }\n      }\n\n      // Scroll Sync\n      rowsContainer.addEventListener('scroll', () => {\n        timelineHeader.scrollLeft = rowsContainer.scrollLeft;\n      });\n\n      // Virtual Rendering\n      function renderVirtualRows(force = false) {\n        const scrollTop = rowsContainer.scrollTop;\n        const containerHeight = rowsContainer.clientHeight;\n\n        const totalHeight = filteredEvents.length * ROW_HEIGHT;\n        virtualSpacer.style.height = totalHeight + 'px';\n\n        const startIndex = Math.floor(scrollTop / ROW_HEIGHT);\n        const endIndex = Math.min(filteredEvents.length, Math.ceil((scrollTop + containerHeight) / ROW_HEIGHT) + BUFFER_SIZE);\n\n        if (!force && startIndex === lastStartIndex && endIndex === lastEndIndex) {\n          return;\n        }\n\n        lastStartIndex = startIndex;\n        lastEndIndex = endIndex;\n\n        const visibleEvents = filteredEvents.slice(Math.max(0, startIndex - BUFFER_SIZE), endIndex);\n        const startOffset = Math.max(0, startIndex - BUFFER_SIZE) * ROW_HEIGHT;\n\n        virtualContent.style.transform = `translateY(${startOffset}px)`;\n\n        const fragment = document.createDocumentFragment();\n        const zoomWidth = (100 * zoomLevel) + '%';\n\n        // Sync Ruler Width\n        document.getElementById('ruler').style.width = zoomWidth;\n\n        visibleEvents.forEach((evt) => {\n          const row = document.createElement('div');\n          row.className = 'trace-row';\n          if (selectedEvent === evt) row.classList.add('selected');\n\n          row.evtData = evt;\n          row.onclick = function () { selectRow(this, evt); };\n\n          const listCol = document.createElement('div');\n          listCol.className = 'row-list';\n          listCol.innerHTML = `\n                    <div class=\"type-icon\" style=\"background-image: url('${getIconUrl(evt.className)}')\"></div>\n                    <div class=\"remote-name\" title=\"${evt.name}\">${evt.name}</div>\n                `;\n\n          const timelineCol = document.createElement('div');\n          timelineCol.className = 'row-timeline';\n          timelineCol.style.width = zoomWidth;\n          timelineCol.style.flex = 'none';\n\n          const marker = document.createElement('div');\n          marker.className = `timeline-marker ${evt.typeClass}`;\n\n          let leftPct = ((evt.relTime) / totalDuration) * 100;\n          if (leftPct > 99) leftPct = 99;\n\n          let widthPct = (0.05 / totalDuration) * 100;\n          if (widthPct < 1) widthPct = 1;\n\n          marker.style.left = leftPct + '%';\n          marker.style.width = widthPct + '%';\n\n          timelineCol.appendChild(marker);\n          row.appendChild(listCol);\n          row.appendChild(timelineCol);\n          fragment.appendChild(row);\n        });\n\n        virtualContent.innerHTML = '';\n        virtualContent.appendChild(fragment);\n      }\n\n      // Ctrl+F Handler\n      document.addEventListener('keydown', function (e) {\n        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {\n          e.preventDefault();\n          const filterInput = document.getElementById('filterInput');\n          filterInput.focus();\n          filterInput.select();\n        }\n      });\n\n      // Initial Render\n      renderVirtualRows();\n      renderRuler();\n\n      function selectRow(el, evt) {\n        const prev = virtualContent.querySelector('.trace-row.selected');\n        if (prev) prev.classList.remove('selected');\n\n        el.classList.add('selected');\n        selectedEvent = evt;\n\n        detailsPanel.classList.add('visible');\n\n        const isIncoming = evt.typeClass === 'incoming';\n        const badgeClass = isIncoming ? 'incoming' : 'outgoing';\n\n        // Flags with Unified Style\n        let flagsHtml = '';\n        if (evt.isExecutor) {\n          flagsHtml += `<div class=\"badge-pill executor\">Executor</div>`;\n        }\n        if (evt.isActor) {\n          flagsHtml += `<div class=\"badge-pill actor\">Actor</div>`;\n        }\n        if (evt.isBlocked) {\n          flagsHtml += `<div class=\"badge-pill blocked\">Blocked</div>`;\n        }\n        if (!flagsHtml) flagsHtml = '<span style=\"color:var(--text-secondary); font-size:11px;\">None</span>';\n\n        const highlightedArgs = syntaxHighlight(evt.args);\n\n        // Icons\n        const copyIcon = `<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-copy icon-copy\"><rect width=\"14\" height=\"14\" x=\"8\" y=\"8\" rx=\"2\" ry=\"2\"/><path d=\"M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2\"/></svg>`;\n        const checkIcon = `<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-check icon-check\"><path d=\"M20 6 9 17l-5-5\"/></svg>`;\n        const parenthesesIcon = `<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-parentheses\"><path d=\"M8 21s-4-3-4-9 4-9 4-9\"/><path d=\"M16 3s4 3 4 9-4 9-4 9\"/></svg>`;\n\n        // Dropdown Icons\n        const hashIcon = `<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-hash\"><line x1=\"4\" x2=\"20\" y1=\"9\" y2=\"9\"/><line x1=\"4\" x2=\"20\" y1=\"15\" y2=\"15\"/><line x1=\"10\" x2=\"8\" y1=\"3\" y2=\"21\"/><line x1=\"16\" x2=\"14\" y1=\"3\" y2=\"21\"/></svg>`;\n        const upvaluesIcon = `<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-a-arrow-up\"><path d=\"m14 11 4-4 4 4\"/><path d=\"M18 16V7\"/><path d=\"m2 16 4.039-9.69a.5.5 0 0 1 .923 0L11 16\"/><path d=\"M3.304 13h6.392\"/></svg>`;\n        const protosIcon = `<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-square-function\"><rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" ry=\"2\"/><path d=\"M9 17c2 0 2.8-1 2.8-2.8V10c0-2 1-3.3 3.2-3\"/><path d=\"M9 11.2h5.7\"/></svg>`;\n        const pathIcon = `<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-route\"><circle cx=\"6\" cy=\"19\" r=\"3\"/><path d=\"M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15\"/><circle cx=\"18\" cy=\"5\" r=\"3\"/></svg>`;\n        const sourceIcon = `<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-code\"><path d=\"m16 18 6-6-6-6\"/><path d=\"m8 6-6 6 6 6\"/></svg>`;\n        const boxIcon = `<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-box\"><path d=\"M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z\"/><path d=\"m3.3 7 8.7 5 8.7-5\"/><path d=\"M12 22v-9\"/></svg>`;\n\n        detailsContent.innerHTML = `\n                <div class=\"details-header-top\">\n                    <div class=\"details-title-group\">\n                        <div class=\"details-icon-large\" style=\"background-image: url('${getIconUrl(evt.className)}')\"></div>\n                        <div class=\"details-name-large\">${escapeHtml(evt.name)}</div>\n                    </div>\n                    <div class=\"details-actions\">\n                        <div class=\"badge-pill ${badgeClass}\">${evt.typeClass.toUpperCase()}</div>\n                        <div class=\"close-btn\" onclick=\"closeDetails()\">\195\151</div>\n                    </div>\n                </div>\n\n                <div class=\"details-path-row\" onclick=\"copyText('${escapeHtml(evt.path).replace(/'/g, \"\\\\'\").replace(/\"/g, \"&quot;\")}', 'Remote Path copied')\" title=\"Click to copy path\"><span class=\"clickable-path\">${escapeHtml(evt.path)}</span></div>\n\n                <div class=\"info-grid\">\n                    <div class=\"info-item\">\n                        <h4>Method</h4>\n                        <div>${escapeHtml(evt.method)}</div>\n                    </div>\n                    <div class=\"info-item\">\n                        <h4>Timestamp</h4>\n                        <div>${formatAbsTime(evt.timestamp)} <span style=\"color:var(--text-secondary)\">(+${formatTime(evt.relTime)})</span></div>\n                    </div>\n                    <div class=\"info-item\">\n                        <h4>ClassName</h4>\n                        <div>${escapeHtml(evt.className)}</div>\n                    </div>\n                    <div class=\"info-item\">\n                        <h4>Remote Path</h4>\n                        <div class=\"remote-path-copy clickable-path\" onclick=\"copyText('${escapeHtml(evt.path).replace(/'/g, \"\\\\'\").replace(/\"/g, \"&quot;\")}', 'Remote Path copied')\" title=\"Click to copy path\">${escapeHtml(evt.path)}</div>\n                    </div>\n                </div>\n\n                <div class=\"content-box\">\n                    <div class=\"box-title\">Caller Data</div>\n                    <button class=\"copy-icon-btn\" onclick=\"toggleCallerDropdown(event)\" title=\"Copy Caller Info\">${copyIcon}</button>\n\n                    <div id=\"callerDropdown\" class=\"dropdown-menu\">\n                        <div class=\"dropdown-item\" onclick=\"copyCallerData('hash')\">${hashIcon} Function Hash</div>\n                        <div class=\"dropdown-item\" onclick=\"copyCallerData('upvalues')\">${upvaluesIcon} Upvalues</div>\n                        <div class=\"dropdown-item\" onclick=\"copyCallerData('protos')\">${protosIcon} Protos</div>\n                        <div class=\"dropdown-item\" onclick=\"copyCallerData('constants')\">${boxIcon} Constants</div>\n                        <div class=\"dropdown-item\" onclick=\"copyCallerData('path')\">${pathIcon} Script Path</div>\n                        <div class=\"dropdown-item\" onclick=\"copyCallerData('source')\">${sourceIcon} Func Source</div>\n                    </div>\n\n                    <div class=\"caller-header\">\n                        <div class=\"caller-icon\">${parenthesesIcon}</div>\n                        <div class=\"caller-info\">\n                            <div class=\"caller-name\">${escapeHtml(evt.funcName)} <span class=\"caller-source\">:${evt.funcLine}</span></div>\n                            <div class=\"caller-source\">${escapeHtml(evt.funcSource)}</div>\n                        </div>\n                    </div>\n\n                    <div class=\"info-grid-2\" style=\"margin-bottom:0; gap:10px;\">\n                         <div class=\"info-item-2\" style=\"margin-right: 100px;\">\n                            <h4>Flags</h4>\n                            <div class=\"flags-row\">${flagsHtml}</div>\n                         </div>\n                         <div class=\"info-item-2\">\n                            <h4>Origin</h4>\n                            <div class=\"origin-row clickable-path\" onclick=\"copyText('${escapeHtml(evt.origin).replace(/'/g, \"\\\\'\").replace(/\"/g, \"&quot;\")}', 'Origin copied')\" title=\"Click to copy origin\">${escapeHtml(evt.origin)}</div>\n                         </div>\n                    </div>\n                </div>\n\n                <div class=\"content-box\">\n                    <div class=\"box-title\">Arguments</div>\n                    <button class=\"copy-icon-btn\" onclick=\"copyArgs(this)\" title=\"Copy Arguments\">\n                        ${copyIcon}\n                        ${checkIcon}\n                    </button>\n                    <div class=\"args-content\">${highlightedArgs}</div>\n                </div>\n            `;\n      }\n\n      function closeDetails() {\n        detailsPanel.classList.remove('visible');\n        const prev = virtualContent.querySelector('.trace-row.selected');\n        if (prev) prev.classList.remove('selected');\n        selectedEvent = null;\n      }\n\n      function handleFilterInput() {\n        if (filterTimeout) clearTimeout(filterTimeout);\n        filterTimeout = setTimeout(applyFilters, 300);\n      }\n\n      function toggleSearchOptions() {\n        const widget = document.getElementById('searchChevron').closest('.search-widget');\n        const options = document.getElementById('searchOptions');\n        const chevron = document.getElementById('searchChevron');\n\n        options.classList.toggle('visible');\n        chevron.classList.toggle('expanded');\n        widget.classList.toggle('expanded');\n      }\n\n      function handleTimeInput() {\n        const minVal = parseFloat(document.getElementById('minTimeInput').value);\n        const maxVal = parseFloat(document.getElementById('maxTimeInput').value);\n        const unit = parseFloat(document.getElementById('timeUnitSelect').value);\n\n        filterMinTime = isNaN(minVal) ? 0 : minVal * unit;\n        filterMaxTime = isNaN(maxVal) ? totalDuration : maxVal * unit;\n\n        if (filterTimeout) clearTimeout(filterTimeout);\n        filterTimeout = setTimeout(applyFilters, 300);\n      }\n\n      function applyFilters() {\n        const query = document.getElementById('filterInput').value.toLowerCase();\n        const checkIncoming = document.getElementById('filterIncoming').checked;\n        const checkOutgoing = document.getElementById('filterOutgoing').checked;\n        const checkActor = document.getElementById('filterActor').checked;\n        const checkNonActor = document.getElementById('filterNonActor').checked;\n        const checkArgs = document.getElementById('filterArgs').checked;\n        const checkProto = document.getElementById('filterProto').checked;\n        const checkConst = document.getElementById('filterConst').checked;\n        const checkHash = document.getElementById('filterHash').checked;\n        const checkSource = document.getElementById('filterSource').checked;\n\n        filteredEvents = allEvents.filter(evt => {\n          // Filter by Type (Incoming/Outgoing)\n          if (checkIncoming || checkOutgoing) {\n            const isIncoming = evt.typeClass === 'incoming';\n            const isOutgoing = evt.typeClass === 'outgoing';\n            if (!((checkIncoming && isIncoming) || (checkOutgoing && isOutgoing))) {\n              return false;\n            }\n          }\n\n          // Filter by Actor Status\n          if (checkActor || checkNonActor) {\n            const isActor = evt.isActor;\n            const isNonActor = !evt.isActor;\n            if (!((checkActor && isActor) || (checkNonActor && isNonActor))) {\n              return false;\n            }\n          }\n\n          let matchesText = !query;\n\n          if (!matchesText) {\n            // Default search: Name and Type\n            if (evt.name.toLowerCase().includes(query) || evt.type.toLowerCase().includes(query)) {\n              matchesText = true;\n            }\n            // Advanced search options\n            else {\n              if (checkArgs && evt.args && evt.args.toLowerCase().includes(query)) matchesText = true;\n              else if (checkProto && evt.protos && evt.protos.toLowerCase().includes(query)) matchesText = true;\n              else if (checkConst && evt.constants && evt.constants.toLowerCase().includes(query)) matchesText = true;\n              else if (checkHash && evt.funcHash && evt.funcHash.toLowerCase().includes(query)) matchesText = true;\n              else if (checkSource && evt.funcSource && evt.funcSource.toLowerCase().includes(query)) matchesText = true;\n            }\n          }\n\n          const matchesTime = evt.relTime >= filterMinTime && evt.relTime <= filterMaxTime;\n\n          return matchesText && matchesTime;\n        });\n\n        // Update Stats\n        statsLabel.innerText = `${filteredEvents.length} Events \226\128\162 ${totalDuration.toFixed(2)}s`;\n\n        // Reset Scroll\n        rowsContainer.scrollTop = 0;\n        lastStartIndex = -1;\n        lastEndIndex = -1;\n\n        if (currentView === 'timeline') {\n          renderVirtualRows(true);\n        } else {\n          renderHeatmap();\n        }\n      } function updateZoom() {\n        const width = (100 * zoomLevel) + '%';\n        rulerContainer.style.width = width;\n        renderRuler();\n        lastStartIndex = -1;\n        renderVirtualRows(true);\n      }\n\n      rowsContainer.addEventListener('wheel', (e) => {\n        if (e.ctrlKey) {\n          e.preventDefault();\n          if (e.deltaY < 0) {\n            zoomLevel = Math.min(zoomLevel * 1.1, 20);\n          } else {\n            zoomLevel = Math.max(zoomLevel / 1.1, 1);\n          }\n          updateZoom();\n        }\n      });\n\n      rowsContainer.addEventListener('scroll', () => {\n        timelineHeader.scrollLeft = rowsContainer.scrollLeft;\n\n        if (!isScrolling) {\n          window.requestAnimationFrame(() => {\n            renderVirtualRows();\n            isScrolling = false;\n          });\n          isScrolling = true;\n        }\n      });\n\n      const sessionInfo = document.querySelector('.session-info');\n      const tooltip = document.querySelector('.session-tooltip');\n\n      sessionInfo.addEventListener('click', (e) => {\n        e.stopPropagation();\n        tooltip.classList.toggle('visible');\n      });\n\n      tooltip.addEventListener('click', (e) => {\n        e.stopPropagation();\n      });\n\n      document.addEventListener('click', () => {\n        tooltip.classList.remove('visible');\n        const dropdown = document.getElementById('callerDropdown');\n        if (dropdown) dropdown.classList.remove('visible');\n      });\n    </script>\n  </body>\n</html>\n"
                                 }
                             },
                             {
@@ -12199,6 +12135,7 @@ local ObjectTree = {
     }
 }
 
+-- Line offsets for debugging (only included when minifyTables is false)
 local LineOffsets = {
     8,
     393,
@@ -12231,15 +12168,19 @@ local LineOffsets = {
     [27] = 11682
 }
 
+-- Misc AOT variable imports
 local WaxVersion = "0.4.1"
 local EnvName = "Cobalt"
 
+-- ++++++++ RUNTIME IMPL BELOW ++++++++ --
+
+-- Localizing certain libraries and built-ins for runtime efficiency
 local string, task, setmetatable, error, next, table, unpack, coroutine, script, type, require, pcall, tostring, tonumber, _VERSION =
       string, task, setmetatable, error, next, table, unpack, coroutine, script, type, require, pcall, tostring, tonumber, _VERSION
 
 local table_insert = table.insert
 local table_remove = table.remove
-local table_freeze = table.freeze or function(t) return t end 
+local table_freeze = table.freeze or function(t) return t end -- lol
 
 local coroutine_wrap = coroutine.wrap
 
@@ -12247,6 +12188,8 @@ local string_sub = string.sub
 local string_match = string.match
 local string_gmatch = string.gmatch
 
+-- The Lune runtime has its own `task` impl, but it must be imported by its builtin
+-- module path, "@lune/task"
 if _VERSION and string_sub(_VERSION, 1, 4) == "Lune" then
     local RequireSuccess, LuneTaskLib = pcall(require, "@lune/task")
     if RequireSuccess and LuneTaskLib then
@@ -12256,10 +12199,12 @@ end
 
 local task_defer = task and task.defer
 
+-- If we're not running on the Roblox engine, we won't have a `task` global
 local Defer = task_defer or function(f, ...)
     coroutine_wrap(f)(...)
 end
 
+-- ClassName "IDs"
 local ClassNameIdBindings = {
     [1] = "Folder",
     [2] = "ModuleScript",
@@ -12268,18 +12213,21 @@ local ClassNameIdBindings = {
     [5] = "StringValue",
 }
 
-local RefBindings = {} 
+local RefBindings = {} -- [RefId] = RealObject
 
 local ScriptClosures = {}
-local ScriptClosureRefIds = {} 
-
+local ScriptClosureRefIds = {} -- [ScriptClosure] = RefId
 local StoredModuleValues = {}
 local ScriptsToRun = {}
 
+-- wax.shared __index/__newindex
 local SharedEnvironment = {}
 
-local RefChildren = {} 
+-- We're creating 'fake' instance refs soley for traversal of the DOM for require() compatibility
+-- It's meant to be as lazy as possible
+local RefChildren = {} -- [Ref] = {ChildrenRef, ...}
 
+-- Implemented instance methods
 local InstanceMethods = {
     GetFullName = { {}, function(self)
         local Path = self.Name
@@ -12288,8 +12236,7 @@ local InstanceMethods = {
         while ObjectPointer do
             Path = ObjectPointer.Name .. "." .. Path
 
-            
-
+            -- Move up the DOM (parent will be nil at the end, and this while loop will stop)
             ObjectPointer = ObjectPointer.Parent
         end
 
@@ -12331,10 +12278,8 @@ local InstanceMethods = {
 
         if recursive then
             for Child in next, Children do
-                
-
-                
-
+                -- Yeah, Roblox follows this behavior- instead of searching the entire base of a
+                -- ref first, the engine uses a direct recursive call
                 return Child:FindFirstChild(name, true)
             end
         end
@@ -12351,13 +12296,13 @@ local InstanceMethods = {
         end
     end},
 
-    
-
+    -- Just to implement for traversal usage
     WaitForChild = { {"string", "number?"}, function(self, name)
         return self:FindFirstChild(name)
     end},
 }
 
+-- "Proxies" to instance methods, with err checks etc
 local InstanceMethodProxies = {}
 for MethodName, MethodObject in next, InstanceMethods do
     local Types = MethodObject[1]
@@ -12394,18 +12339,15 @@ for MethodName, MethodObject in next, InstanceMethods do
 end
 
 local function CreateRef(className, name, parent)
-    
+    -- `name` and `parent` can also be set later by the init script if they're absent
 
-    
-
+    -- Extras
     local StringValue_Value
 
-    
-
+    -- Will be set to RefChildren later aswell
     local Children = setmetatable({}, {__mode = "k"})
 
-    
-
+    -- Err funcs
     local function InvalidMember(member)
         error(member .. " is not a valid (virtual) member of " .. className .. " \"" .. name .. "\"", 3)
     end
@@ -12419,19 +12361,16 @@ local function CreateRef(className, name, parent)
     RefMetatable.__metatable = false
 
     RefMetatable.__index = function(_, index)
-        if index == "ClassName" then 
-
+        if index == "ClassName" then -- First check "properties"
             return className
         elseif index == "Name" then
             return name
         elseif index == "Parent" then
             return parent
         elseif className == "StringValue" and index == "Value" then
-            
-
+            -- Supporting StringValue.Value for Rojo .txt file conv
             return StringValue_Value
-        else 
-
+        else -- Lastly, check "methods"
             local InstanceMethod = InstanceMethodProxies[index]
 
             if InstanceMethod then
@@ -12439,53 +12378,45 @@ local function CreateRef(className, name, parent)
             end
         end
 
-        
-
+        -- Next we'll look thru child refs
         for Child in next, Children do
             if Child.Name == index then
                 return Child
             end
         end
 
-        
-
+        -- At this point, no member was found; this is the same err format as Roblox
         InvalidMember(index)
     end
 
     RefMetatable.__newindex = function(_, index, value)
-        
-
+        -- __newindex is only for props fyi
         if index == "ClassName" then
             ReadOnlyProperty(index)
         elseif index == "Name" then
             name = value
         elseif index == "Parent" then
-            
-
+            -- We'll just ignore the process if it's trying to set itself
             if value == Ref then
                 return
             end
 
             if parent ~= nil then
-                
-
+                -- Remove this ref from the CURRENT parent
                 RefChildren[parent][Ref] = nil
             end
 
             parent = value
 
             if value ~= nil then
-                
-
+                -- And NOW we're setting the new parent
                 RefChildren[value][Ref] = true
             end
         elseif className == "StringValue" and index == "Value" then
-            
-
+            -- Supporting StringValue.Value for Rojo .txt file conv
             StringValue_Value = value
         else
-            
-
+            -- Same err as __index when no member is found
             InvalidMember(index)
         end
     end
@@ -12505,19 +12436,18 @@ local function CreateRef(className, name, parent)
     return Ref
 end
 
+-- Create real ref DOM from object tree
 local function CreateRefFromObject(object, parent)
     local RefId = object[1]
     local ClassNameId = object[2]
-    local Properties = object[3] 
-
-    local Children = object[4] 
+    local Properties = object[3] -- Optional
+    local Children = object[4] -- Optional
 
     local ClassName = ClassNameIdBindings[ClassNameId]
 
     local Name = Properties and table_remove(Properties, 1) or ClassName
 
-    local Ref = CreateRef(ClassName, Name, parent) 
-
+    local Ref = CreateRef(ClassName, Name, parent) -- 3rd arg may be nil if this is from root
     RefBindings[RefId] = Ref
 
     if Properties then
@@ -12540,6 +12470,7 @@ for _, Object in next, ObjectTree do
     CreateRefFromObject(Object, RealObjectRoot)
 end
 
+-- Now we'll set script closure refs and check if they should be ran as a BaseScript
 for RefId, Closure in next, ClosureBindings do
     local Ref = RefBindings[RefId]
 
@@ -12555,8 +12486,7 @@ end
 local function LoadScript(scriptRef)
     local ScriptClassName = scriptRef.ClassName
 
-    
-
+    -- First we'll check for a cached module value (packed into a tbl)
     local StoredModuleValue = StoredModuleValues[scriptRef]
     if StoredModuleValue and ScriptClassName == "ModuleScript" then
         return unpack(StoredModuleValue)
@@ -12569,8 +12499,7 @@ local function LoadScript(scriptRef)
 
         local VirtualFullName = scriptRef:GetFullName()
 
-        
-
+        -- Check for vanilla/Roblox format
         local OriginalErrorLine, BaseErrorMessage = string_match(originalErrorMessage, "[^:]+:(%d+): (.+)")
 
         if not OriginalErrorLine or not LineOffsets then
@@ -12590,8 +12519,7 @@ local function LoadScript(scriptRef)
         return VirtualFullName .. ":" .. RealErrorLine .. ": " .. BaseErrorMessage
     end
 
-    
-
+    -- If it's a BaseScript, we'll just run it directly!
     if ScriptClassName == "LocalScript" or ScriptClassName == "Script" then
         local RunSuccess, ErrorMessage = xpcall(Closure, function(msg)
             return msg
@@ -12615,6 +12543,8 @@ local function LoadScript(scriptRef)
     end
 end
 
+-- We'll assign the actual func from the top of this output for flattening user globals at runtime
+-- Returns (in a tuple order): wax, script, require
 function ImportGlobals(refId)
     local ScriptRef = RefBindings[refId]
 
@@ -12631,8 +12561,7 @@ function ImportGlobals(refId)
         return unpack(PCallReturn)
     end
 
-    
-
+    -- `wax.shared` index
     local WaxShared = table_freeze(setmetatable({}, {
         __index = SharedEnvironment,
         __newindex = function(_, index, value)
@@ -12647,15 +12576,13 @@ function ImportGlobals(refId)
     }))
 
     local Global_wax = table_freeze({
-        
-
+        -- From AOT variable imports
         version = WaxVersion,
         envname = EnvName,
 
         shared = WaxShared,
 
-        
-
+        -- "Real" globals instead of the env set ones
         script = script,
         require = require,
     })
@@ -12677,7 +12604,7 @@ function ImportGlobals(refId)
 
             return LoadScript(module)
         elseif ModuleArgType == "string" and string_sub(module, 1, 1) ~= "@" then
-            
+            -- The control flow on this SUCKS
 
             if #module == 0 then
                 error("Attempted to call require with empty string", 2)
@@ -12698,8 +12625,7 @@ function ImportGlobals(refId)
                     RealIndex = "Parent"
                 end
 
-                
-
+                -- Don't advance dir if it's just another "/" either
                 if RealIndex ~= "" then
                     local ResultRef = CurrentRefPointer:FindFirstChild(RealIndex)
                     if not ResultRef then
@@ -12716,8 +12642,7 @@ function ImportGlobals(refId)
                     end
                 end
 
-                
-
+                -- For possible checks next cycle
                 PreviousPathMatch = PathMatch
             end
 
@@ -12733,8 +12658,7 @@ function ImportGlobals(refId)
         return RealCall(require, module, ...)
     end
 
-    
-
+    -- Now, return flattened globals ready for direct runtime exec
     return Global_wax, Global_script, Global_require
 end
 
